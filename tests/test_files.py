@@ -12,3 +12,8 @@ def test_private_directory(tmp_path):
 def test_existing_directory(tmp_path):
     with pytest.raises(FileExistsError):
         files.create_private_directory(tmp_path)
+
+
+def test_private_file(tmp_path):
+    files.write_private(tmp_path / "secret", b"private")
+    assert (tmp_path / "secret").read_bytes() == b"private"
