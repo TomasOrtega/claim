@@ -37,7 +37,11 @@ def test_pending(pending):
     assert timestamp.verify(b"record", pending) == {"status": "pending"}
 
 
-def test_unverified_anchor(anchored):
+def test_unverified_anchor(anchored, monkeypatch):
+    def unavailable(**_):
+        raise ValueError("node unavailable")
+
+    monkeypatch.setattr(timestamp, "Proxy", unavailable, raising=False)
     with pytest.raises(ValueError):
         timestamp.verify(b"record", anchored)
 
