@@ -8,4 +8,7 @@ def freeze(source: Path, opening: Path, key: bytes) -> str:
     artifact = files.read_limited(source, MAX_ARTIFACT_BYTES)
     salt = commitment.new_salt()
     storage.save_opening(opening, artifact, salt, key)
-    return commitment.commit(artifact, salt)
+    digest = commitment.commit(artifact, salt)
+    if not commitment.verify_opening(*storage.load_opening(opening, key), digest):
+        raise ValueError("stored opening does not match commitment")
+    return digest
