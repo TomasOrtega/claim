@@ -59,6 +59,12 @@ def test_verified_anchor(anchored, node):
     }
 
 
+def test_wrong_merkle_root(anchored, node):
+    node.getblockheader(b"hash").hashMerkleRoot = bytes(32)
+    with pytest.raises(ValueError, match="does not match Bitcoin chain"):
+        timestamp.verify(b"record", anchored)
+
+
 def test_unverified_anchor(anchored, monkeypatch):
     def unavailable(**_):
         raise ValueError("node unavailable")
