@@ -1,6 +1,6 @@
 import pytest
 
-from claim import record, registry
+from claim import record, registry, timestamp
 
 
 @pytest.mark.parametrize("claim_id", ["../secret", "", "A" * 64, "a" * 63])
@@ -79,6 +79,14 @@ def test_pending_registry_status(sealed, receipt):
     assert registry.timestamp_status(data, [receipt.read_bytes()]) == {
         "status": "pending"
     }
+
+
+def test_failed_registry_status(monkeypatch):
+    def fail(*_):
+        raise OSError("private operator path")
+
+    monkeypatch.setattr(timestamp, "verify", fail)
+    assert registry.timestamp_status(b"record", [b"proof"]) == {"status": "failed"}
 
 
 def test_submission(sealed):
