@@ -22,6 +22,8 @@ def decrypt_opening(token: bytes, key: bytes) -> tuple[bytes, bytes]:
         raise ValueError("opening exceeds size limit")
     payload = Fernet(key).decrypt(token)
     offset = len(_PREFIX) + 32
+    if len(payload) > offset + MAX_ARTIFACT_BYTES:
+        raise ValueError("artifact exceeds size limit")
     if not payload.startswith(_PREFIX) or len(payload) < offset:
         raise ValueError("invalid opening format")
     return payload[offset:], payload[len(_PREFIX) : offset]
