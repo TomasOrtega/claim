@@ -94,6 +94,14 @@ def test_oversized_input(monkeypatch):
         record.load_record(b"four")
 
 
+def test_duplicate_json_key(public_record):
+    data = record.dump_record(public_record).replace(
+        b'"version":1', b'"version":2,"version":1'
+    )
+    with pytest.raises(ValueError, match="duplicate JSON key"):
+        record.load_record(data)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):

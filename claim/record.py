@@ -40,9 +40,16 @@ def dump_record(record: dict) -> bytes:
     return data
 
 
+def _unique_object(pairs: list[tuple[str, object]]) -> dict:
+    record = dict(pairs)
+    if len(record) != len(pairs):
+        raise ValueError("duplicate JSON key")
+    return record
+
+
 def load_record(data: bytes) -> dict:
     if len(data) > MAX_RECORD_BYTES:
         raise ValueError("record exceeds size limit")
-    record = json.loads(data.decode("utf-8"))
+    record = json.loads(data.decode("utf-8"), object_pairs_hook=_unique_object)
     validate_record(record)
     return record
