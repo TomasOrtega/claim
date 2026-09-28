@@ -76,6 +76,16 @@ def test_published_vector(node):
     }
 
 
+def test_wrong_calendar_receipt(pending, monkeypatch):
+    monkeypatch.setattr(
+        timestamp,
+        "run_ots",
+        lambda _, path: path.with_suffix(".ots").write_bytes(pending),
+    )
+    with pytest.raises(ValueError, match="timestamp does not match record"):
+        timestamp.stamp(b"different record")
+
+
 def test_parse_receipt(pending):
     assert timestamp.parse_receipt(b"record", pending).file_hash_op == OpSHA256()
 
