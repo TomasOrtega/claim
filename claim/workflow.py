@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from claim import commitment, files, record, storage
-from claim.limits import MAX_ARTIFACT_BYTES
+from claim.limits import MAX_ARTIFACT_BYTES, MAX_RECORD_BYTES
 
 
 def freeze(source: Path, opening: Path, key: bytes) -> str:
@@ -28,3 +28,12 @@ def check_opening(data: bytes, artifact: bytes, salt: bytes) -> str:
     if not commitment.verify_opening(artifact, salt, public["commitment"]):
         raise ValueError("opening does not match record")
     return public["commitment"]
+
+
+def disclose(directory: Path, output: Path, key: bytes) -> None:
+    data = files.read_limited(directory / "record.json", MAX_RECORD_BYTES)
+    artifact, salt = storage.load_opening(directory / "opening.fernet", key)
+    check_opening(data, artifact, salt)
+    files.create_private_directory(output)
+    for name, content in {"proof": artifact, "salt": salt, "record.json": data}.items():
+        files.write_private(output / name, content)

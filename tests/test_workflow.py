@@ -31,6 +31,16 @@ def test_existing_claim_directory(tmp_path, key):
         workflow.seal(tmp_path / "missing", tmp_path, key, ["Alice"])
 
 
+def test_disclose(sealed, tmp_path, key):
+    output = tmp_path / "disclosed"
+    workflow.disclose(sealed, output, key)
+    assert {p.name for p in output.iterdir()} == {"proof", "salt", "record.json"}
+    assert (output / "proof").read_bytes() == b"proof\r\n\xff"
+    assert (output / "record.json").read_bytes() == (
+        sealed / "record.json"
+    ).read_bytes()
+
+
 def test_record_mismatch(sealed):
     with pytest.raises(ValueError, match="opening does not match record"):
         workflow.check_opening(
