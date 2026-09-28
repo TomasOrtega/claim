@@ -1,4 +1,12 @@
+from datetime import UTC, datetime
 from html import escape
+
+
+def timestamp_label(status: dict) -> str:
+    if status["status"] != "verified":
+        return status["status"]
+    date = datetime.fromtimestamp(status["unix_time"], UTC).strftime("%Y-%m-%d UTC")
+    return f"{date} (block {status['block_height']})"
 
 
 def claim_row(entry: dict) -> str:

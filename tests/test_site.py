@@ -9,3 +9,13 @@ def test_author_escaping():
     }
     html = site.claim_row(entry)
     assert "<script>" not in html and "&lt;script&gt;" in html
+
+
+def test_timestamp_label():
+    assert site.timestamp_label({"status": "pending"}) == "pending"
+    assert (
+        site.timestamp_label(
+            {"status": "verified", "unix_time": 1432827678, "block_height": 358391}
+        )
+        == "2015-05-28 UTC (block 358391)"
+    )
