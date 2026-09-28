@@ -131,6 +131,8 @@ def test_export_registry(accepted, tmp_path):
     index = json.loads((tmp_path / "site" / "index.json").read_bytes())
     assert [entry["id"] for entry in index["claims"]] == [claim_id]
     assert index["authors"] == {"Alice": 1}
+    assert "Alice" in (tmp_path / "site" / "index.html").read_text()
+    assert (tmp_path / "site" / ".nojekyll").exists()
 
 
 def test_export_inside_registry(accepted):

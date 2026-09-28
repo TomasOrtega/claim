@@ -6,7 +6,7 @@ from pathlib import Path
 
 from bitcoin.rpc import JSONRPCError
 
-from claim import encryption, files, record, timestamp
+from claim import encryption, files, record, site, timestamp
 from claim.limits import MAX_OPENING_BYTES, MAX_TIMESTAMP_BYTES
 
 
@@ -97,6 +97,8 @@ def export(root: Path, output: Path) -> None:
     ]
     counts = Counter(name for entry in entries for name in entry["authors"])
     index = {"claims": entries, "authors": dict(sorted(counts.items()))}
+    files.write_private(output / "index.html", site.render(index).encode("utf-8"))
+    files.write_private(output / ".nojekyll", b"")
     files.write_private(
         output / "index.json",
         json.dumps(index, ensure_ascii=False, indent=2).encode("utf-8") + b"\n",
