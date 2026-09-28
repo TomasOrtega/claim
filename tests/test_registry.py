@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from claim import record, registry, timestamp
@@ -121,6 +123,14 @@ def test_export_allowlist(accepted, tmp_path, key):
         "receipts",
     }
     assert not (tmp_path / "public" / "private-key").exists()
+
+
+def test_export_registry(accepted, tmp_path):
+    root, claim_id = accepted
+    registry.export(root, tmp_path / "site")
+    index = json.loads((tmp_path / "site" / "index.json").read_bytes())
+    assert [entry["id"] for entry in index["claims"]] == [claim_id]
+    assert index["authors"] == {"Alice": 1}
 
 
 def test_submission(sealed):

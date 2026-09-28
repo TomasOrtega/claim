@@ -1,4 +1,6 @@
+import json
 import re
+from collections import Counter
 from hashlib import sha256
 from pathlib import Path
 
@@ -83,6 +85,22 @@ def export_claim(directory: Path, output: Path) -> dict:
     for name, proof in proofs.items():
         files.write_private(output / name, proof)
     return entry
+
+
+def export(root: Path, output: Path) -> None:
+    if output.resolve().is_relative_to(root.resolve()):
+        raise ValueError("public output must be outside the registry")
+    files.create_private_directory(output)
+    entries = [
+        export_claim(path, output / path.name)
+        for path in sorted((root / "claims").iterdir())
+    ]
+    counts = Counter(name for entry in entries for name in entry["authors"])
+    index = {"claims": entries, "authors": dict(sorted(counts.items()))}
+    files.write_private(
+        output / "index.json",
+        json.dumps(index, ensure_ascii=False, indent=2).encode("utf-8") + b"\n",
+    )
 
 
 def accept(root: Path, source: Path, receipt: Path) -> str:
