@@ -66,6 +66,14 @@ def test_receipt_append_is_exclusive(accepted, receipt):
     )
 
 
+def test_altered_receipt_name(accepted):
+    directory = registry.location(*accepted)
+    path = next((directory / "timestamps").iterdir())
+    path.rename(path.with_name("changed.ots"))
+    with pytest.raises(ValueError, match="timestamp receipt ID mismatch"):
+        registry.read_receipts(directory, registry.read_claim(directory))
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
