@@ -133,6 +133,12 @@ def test_export_registry(accepted, tmp_path):
     assert index["authors"] == {"Alice": 1}
 
 
+def test_export_inside_registry(accepted):
+    root, _ = accepted
+    with pytest.raises(ValueError, match="outside the registry"):
+        registry.export(root, root / "public")
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
