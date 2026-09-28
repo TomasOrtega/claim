@@ -10,6 +10,7 @@ from claim.record import read_record
 def add_commands(commands) -> None:
     for name in ("stamp", "upgrade", "verify-time"):
         command = commands.add_parser(name)
+        command.set_defaults(run=run)
         command.add_argument("record", type=Path)
         if name != "stamp":
             command.add_argument("proof", type=Path)

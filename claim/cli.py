@@ -43,7 +43,7 @@ def main(argv=None) -> int:
             workflow.verify(args.directory)
             print("Opening matches; timestamp not checked.")
         else:
-            return timestamp_cli.run(args)
+            return args.run(args)
     except InvalidToken:
         parser.exit(1, "claim: invalid key or encrypted opening\n")
     except (OSError, ValueError, TimeoutExpired, JSONRPCError) as exc:
