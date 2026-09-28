@@ -16,6 +16,14 @@ def location(root: Path, claim_id: str) -> Path:
     return root / "claims" / claim_id
 
 
+def preserve_git_bytes(root: Path) -> None:
+    path = root / ".gitattributes"
+    if not path.exists():
+        files.write_private(path, b"* -text\n")
+    elif files.read_limited(path, 1024) != b"* -text\n":
+        raise ValueError("registry .gitattributes must contain only '* -text'")
+
+
 def read_submission(source: Path) -> tuple[bytes, bytes]:
     if {p.name for p in source.iterdir()} != {"record.json", "opening.fernet"}:
         raise ValueError("unexpected submission files")
@@ -113,6 +121,7 @@ def accept(root: Path, source: Path, receipt: Path) -> str:
     claim_id = record.record_id(data)
     directory = location(root, claim_id)
     root.mkdir(mode=0o700, exist_ok=True)
+    preserve_git_bytes(root)
     directory.parent.mkdir(mode=0o700, exist_ok=True)
     files.create_private_directory(directory)
     files.write_private(directory / "opening.fernet", token)
