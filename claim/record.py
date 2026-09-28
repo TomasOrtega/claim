@@ -1,6 +1,8 @@
 import json
 import re
 
+from claim.limits import MAX_RECORD_BYTES
+
 
 def validate_record(record: dict) -> None:
     if not isinstance(record, dict) or record.keys() != {
@@ -32,4 +34,7 @@ def build_record(commitment: str, authors: list[str]) -> dict:
 def dump_record(record: dict) -> bytes:
     validate_record(record)
     text = json.dumps(record, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return (text + "\n").encode("utf-8")
+    data = (text + "\n").encode("utf-8")
+    if len(data) > MAX_RECORD_BYTES:
+        raise ValueError("record exceeds size limit")
+    return data
