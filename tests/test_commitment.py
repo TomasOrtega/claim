@@ -59,3 +59,8 @@ def test_empty_vector():
 @pytest.mark.parametrize("ending", [b"", b"\r\n"])
 def test_line_endings(ending):
     assert not verify_opening(ARTIFACT[:-1] + ending, SALT, COMMITMENT)
+
+
+@pytest.mark.parametrize("value", ["", "0" * 64, COMMITMENT.upper(), "é" * 64])
+def test_wrong_commitment(value):
+    assert not verify_opening(ARTIFACT, SALT, value)
