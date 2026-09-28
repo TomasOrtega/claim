@@ -41,6 +41,8 @@ def dump_record(record: dict) -> bytes:
 
 
 def load_record(data: bytes) -> dict:
+    if len(data) > MAX_RECORD_BYTES:
+        raise ValueError("record exceeds size limit")
     record = json.loads(data.decode("utf-8"))
     validate_record(record)
     return record

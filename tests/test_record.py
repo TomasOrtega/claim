@@ -88,6 +88,12 @@ def test_load_record(public_record):
     assert record.load_record(record.dump_record(public_record)) == public_record
 
 
+def test_oversized_input(monkeypatch):
+    monkeypatch.setattr(record, "MAX_RECORD_BYTES", 3)
+    with pytest.raises(ValueError, match="record exceeds size limit"):
+        record.load_record(b"four")
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
