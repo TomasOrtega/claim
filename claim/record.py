@@ -5,3 +5,5 @@ def validate_record(record: dict) -> None:
         "authors",
     }:
         raise ValueError("invalid record fields")
+    if type(record["version"]) is not int or record["version"] != 1:
+        raise ValueError("unsupported record version")
