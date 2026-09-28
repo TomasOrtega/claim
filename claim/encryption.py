@@ -1,3 +1,5 @@
+from base64 import b64decode, urlsafe_b64encode
+
 from cryptography.fernet import Fernet
 
 from claim.limits import MAX_ARTIFACT_BYTES, MAX_OPENING_BYTES
@@ -7,6 +9,14 @@ _PREFIX = b"claim:opening:v1\0"
 
 def new_key() -> bytes:
     return Fernet.generate_key()
+
+
+def validate_token(token: bytes) -> None:
+    raw = b64decode(token, altchars=b"-_", validate=True)
+    if len(raw) < 121 or raw[0] != 0x80 or (len(raw) - 57) % 16:
+        raise ValueError("invalid encrypted opening")
+    if urlsafe_b64encode(raw) != token:
+        raise ValueError("invalid encrypted opening encoding")
 
 
 def encrypt_opening(artifact: bytes, salt: bytes, key: bytes) -> bytes:
