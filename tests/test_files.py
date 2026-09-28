@@ -58,3 +58,10 @@ def test_negative_read_limit(tmp_path):
 def test_checkout_destination():
     with pytest.raises(ValueError, match="outside the source checkout"):
         files.require_external(Path(__file__).parent / "private")
+
+
+def test_checkout_symlink(tmp_path):
+    link = tmp_path / "link"
+    link.symlink_to(Path(__file__).parent, target_is_directory=True)
+    with pytest.raises(ValueError, match="outside the source checkout"):
+        files.require_external(link / "private")
