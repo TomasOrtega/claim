@@ -74,6 +74,13 @@ def test_altered_receipt_name(accepted):
         registry.read_receipts(directory, registry.read_claim(directory))
 
 
+def test_pending_registry_status(sealed, receipt):
+    data = (sealed / "record.json").read_bytes()
+    assert registry.timestamp_status(data, [receipt.read_bytes()]) == {
+        "status": "pending"
+    }
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()

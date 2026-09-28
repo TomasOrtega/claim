@@ -2,6 +2,8 @@ import re
 from hashlib import sha256
 from pathlib import Path
 
+from bitcoin.rpc import JSONRPCError
+
 from claim import encryption, files, record, timestamp
 from claim.limits import MAX_OPENING_BYTES, MAX_TIMESTAMP_BYTES
 
@@ -52,6 +54,19 @@ def add_receipt(root: Path, claim_id: str, proof_path: Path) -> None:
     directory = location(root, claim_id)
     data = read_claim(directory)
     save_receipt(directory, data, files.read_limited(proof_path, MAX_TIMESTAMP_BYTES))
+
+
+def timestamp_status(data: bytes, proofs) -> dict:
+    results = []
+    for proof in proofs:
+        try:
+            results.append(timestamp.verify(data, proof))
+        except (OSError, ValueError, JSONRPCError):
+            results.append({"status": "failed"})
+    verified = [r for r in results if r["status"] == "verified"]
+    if verified:
+        return min(verified, key=lambda r: r["unix_time"])
+    return {"status": "pending" if {"status": "pending"} in results else "failed"}
 
 
 def accept(root: Path, source: Path, receipt: Path) -> str:
