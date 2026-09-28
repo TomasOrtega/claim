@@ -72,3 +72,9 @@ def test_oversized_artifact(key, monkeypatch):
     monkeypatch.setattr(encryption, "MAX_ARTIFACT_BYTES", 3, raising=False)
     with pytest.raises(ValueError, match="artifact exceeds size limit"):
         encryption.encrypt_opening(b"four", SALT, key)
+
+
+def test_oversized_token(key, monkeypatch):
+    monkeypatch.setattr(encryption, "MAX_OPENING_BYTES", 3, raising=False)
+    with pytest.raises(ValueError, match="opening exceeds size limit"):
+        encryption.decrypt_opening(b"four", key)

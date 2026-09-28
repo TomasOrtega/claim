@@ -1,6 +1,6 @@
 from cryptography.fernet import Fernet
 
-from claim.limits import MAX_ARTIFACT_BYTES
+from claim.limits import MAX_ARTIFACT_BYTES, MAX_OPENING_BYTES
 
 _PREFIX = b"claim:opening:v1\0"
 
@@ -18,6 +18,8 @@ def encrypt_opening(artifact: bytes, salt: bytes, key: bytes) -> bytes:
 
 
 def decrypt_opening(token: bytes, key: bytes) -> tuple[bytes, bytes]:
+    if len(token) > MAX_OPENING_BYTES:
+        raise ValueError("opening exceeds size limit")
     payload = Fernet(key).decrypt(token)
     offset = len(_PREFIX) + 32
     if not payload.startswith(_PREFIX) or len(payload) < offset:
