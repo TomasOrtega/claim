@@ -6,6 +6,8 @@ from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import BytesSerializationContext
 from opentimestamps.core.timestamp import DetachedTimestampFile
 
+from claim import timestamp
+
 
 @pytest.fixture
 def pending():
@@ -16,3 +18,7 @@ def pending():
     context = BytesSerializationContext()
     receipt.serialize(context)
     return context.getbytes()
+
+
+def test_parse_receipt(pending):
+    assert timestamp.parse_receipt(b"record", pending).file_hash_op == OpSHA256()
