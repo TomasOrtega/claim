@@ -28,6 +28,13 @@ def test_invalid_commitment(public_record, digest):
         record.validate_record(public_record)
 
 
+@pytest.mark.parametrize("authors", [None, [], "Alice", {"name": "Alice"}, ("Alice",)])
+def test_invalid_author_list(public_record, authors):
+    public_record["authors"] = authors
+    with pytest.raises(ValueError, match="invalid authors"):
+        record.validate_record(public_record)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):

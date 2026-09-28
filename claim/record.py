@@ -13,3 +13,6 @@ def validate_record(record: dict) -> None:
     digest = record["commitment"]
     if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
         raise ValueError("invalid commitment")
+    authors = record["authors"]
+    if not isinstance(authors, list) or not authors:
+        raise ValueError("invalid authors")
