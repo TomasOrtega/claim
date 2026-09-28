@@ -1,5 +1,6 @@
 from hashlib import sha256
 
+from bitcoin import MainParams
 from bitcoin.rpc import Proxy
 from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, VerificationError
 from opentimestamps.core.op import OpSHA256
@@ -37,6 +38,8 @@ def verify(data: bytes, proof: bytes) -> dict:
     if not anchors:
         return {"status": "pending"}
     node = Proxy(timeout=10)
+    if node.getblockhash(0) != MainParams.GENESIS_BLOCK.GetHash():
+        raise ValueError("Bitcoin mainnet node required")
     for message, attestation in sorted(anchors, key=lambda item: item[1].height):
         try:
             header = node.getblockheader(node.getblockhash(attestation.height))

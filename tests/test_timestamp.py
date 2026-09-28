@@ -3,6 +3,7 @@ from io import BytesIO
 from types import SimpleNamespace
 
 import pytest
+from bitcoin import MainParams
 from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAttestation
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import BytesSerializationContext
@@ -37,7 +38,8 @@ def node(monkeypatch):
         hashMerkleRoot=sha256(b"record").digest(), nTime=1234567890
     )
     node = SimpleNamespace(
-        getblockhash=lambda _: b"hash", getblockheader=lambda _: header
+        getblockhash=lambda _: MainParams.GENESIS_BLOCK.GetHash(),
+        getblockheader=lambda _: header,
     )
     monkeypatch.setattr(timestamp, "Proxy", lambda **_: node, raising=False)
     return node
@@ -62,6 +64,12 @@ def test_verified_anchor(anchored, node):
 def test_wrong_merkle_root(anchored, node):
     node.getblockheader(b"hash").hashMerkleRoot = bytes(32)
     with pytest.raises(ValueError, match="does not match Bitcoin chain"):
+        timestamp.verify(b"record", anchored)
+
+
+def test_wrong_chain(anchored, node):
+    node.getblockhash = lambda _: b"other chain"
+    with pytest.raises(ValueError, match="Bitcoin mainnet node required"):
         timestamp.verify(b"record", anchored)
 
 
