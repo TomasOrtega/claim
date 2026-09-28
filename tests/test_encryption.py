@@ -14,3 +14,8 @@ def key():
 
 def test_generated_key():
     assert Fernet(encryption.new_key()).encrypt(b"proof")
+
+
+def test_encrypt_opening(key):
+    token = encryption.encrypt_opening(ARTIFACT, SALT, key)
+    assert Fernet(key).decrypt(token) == b"claim:opening:v1\0" + SALT + ARTIFACT
