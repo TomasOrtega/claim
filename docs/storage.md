@@ -1,44 +1,26 @@
-# Saving a claim
+# Local commands
 
-Generate one key with `claim.encryption.new_key()`. Store its ASCII text in a
-password manager and a separate secure backup, then reuse it for your projects.
-Keep both copies private and check that the backup can decrypt a saved opening.
-There is no key recovery service.
+Run from this checkout. Keep private files outside it. Replace the paths and name:
 
-Run this from the checkout with `uv run python`, replacing the proof path and
-author name. The new claim directory must be outside the checkout. The prompt
-accepts your saved key without echoing it.
-
-```python
-from getpass import getpass
-from pathlib import Path
-
-from claim.commitment import commit, new_salt, verify_opening
-from claim.files import create_private_directory, read_limited, write_private
-from claim.limits import MAX_ARTIFACT_BYTES
-from claim.record import build_record, dump_record
-from claim.storage import load_opening, save_opening
-
-key = getpass("Researcher encryption key: ").encode("ascii")
-directory = Path.home() / "my-claim"
-create_private_directory(directory)
-artifact = read_limited(Path.home() / "proof.pdf", MAX_ARTIFACT_BYTES)
-salt = new_salt()
-record = build_record(commit(artifact, salt), ["Your Name"])
-opening = directory / "opening.fernet"
-save_opening(opening, artifact, salt, key)
-assert verify_opening(*load_opening(opening, key), record["commitment"])
-write_private(directory / "record.json", dump_record(record))
+```sh
+uv run python -m claim keygen ~/researcher.key
+uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author "Your Name"
+uv run python -m claim disclose ~/my-claim ~/disclosed --key ~/researcher.key
+uv run python -m claim verify ~/disclosed
 ```
 
-Back up `opening.fernet`; it contains the exact proof bytes and salt, encrypted
-together. `record.json` can be public. Keep its exact bytes for later timestamping.
-Existing files are never overwritten. An interrupted run can leave a partial
-directory; check that the opening matches the record before publishing it.
+Generate the key once; reuse it across projects. Store its 44-character ASCII text
+in a password manager and a separate secure backup. Check that the backup can
+decrypt a saved opening. Losing all copies makes encrypted proofs unrecoverable.
 
-To disclose, decrypt the opening and publish the returned proof bytes and salt
-with the public record. Anyone can check them with `verify_opening`; they do not
-need your key. Editing the source proof never changes an existing opening.
+Repeat `--author` for coauthors. Sealing writes `opening.fernet` and `record.json`.
+Back up the encrypted opening too. Only the record can be public before disclosure.
 
-Limits: 10 MiB per proof, 14 MiB per encrypted opening, 64 KiB per public record.
-Files are read into memory. New private directories use mode `0700`, files `0600`.
+Disclosure exports `proof` (original bytes), `salt` (32 raw bytes), and the unchanged
+`record.json`. Publish these files; never publish the key. Verification needs no key
+and currently checks only the commitment, not a timestamp.
+
+Commands refuse existing output files or directories. An interrupted seal can
+leave a partial directory; only a successful run produces a checked claim.
+Limits: 10 MiB proofs, 14 MiB encrypted openings, 64 KiB records. Files are read
+into memory. Private directories use mode `0700`, files `0600`.
