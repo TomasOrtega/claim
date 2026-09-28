@@ -49,6 +49,12 @@ def test_parse_receipt(pending):
     assert timestamp.parse_receipt(b"record", pending).file_hash_op == OpSHA256()
 
 
+def test_ots_client(pending, tmp_path):
+    path = tmp_path / "receipt.ots"
+    path.write_bytes(pending)
+    timestamp.run_ots("info", path)
+
+
 def test_pending(pending):
     assert timestamp.verify(b"record", pending) == {"status": "pending"}
 

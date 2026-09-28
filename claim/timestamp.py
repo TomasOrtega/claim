@@ -1,4 +1,7 @@
+import subprocess
+import sys
 from hashlib import sha256
+from pathlib import Path
 
 from bitcoin import MainParams
 from bitcoin.rpc import Proxy
@@ -11,6 +14,26 @@ from opentimestamps.core.serialize import (
 from opentimestamps.core.timestamp import DetachedTimestampFile
 
 from claim.limits import MAX_TIMESTAMP_BYTES
+
+
+def run_ots(command: str, path: Path) -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from otsclient.ots import main; main()",
+            "--no-cache",
+            "--no-bitcoin",
+            command,
+            str(path),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    if result.returncode:
+        raise ValueError(f"timestamp {command} failed: {result.stderr.strip()}")
 
 
 def parse_receipt(data: bytes, proof: bytes) -> DetachedTimestampFile:
