@@ -17,6 +17,13 @@ def test_help():
     assert "usage:" in result.stdout
 
 
+def test_disclose(sealed, tmp_path, key_file):
+    output = tmp_path / "disclosed"
+    result = run("disclose", sealed, output, "--key", key_file)
+    assert result.returncode == 0
+    assert (output / "proof").read_bytes() == b"proof\r\n\xff"
+
+
 def test_seal(tmp_path, key_file):
     source, directory = tmp_path / "proof", tmp_path / "sealed"
     source.write_bytes(b"proof")

@@ -15,6 +15,10 @@ def main(argv=None) -> int:
     seal.add_argument("directory", type=Path)
     seal.add_argument("--key", type=Path, required=True)
     seal.add_argument("--author", action="append", required=True)
+    disclose = commands.add_parser("disclose", help="export a proof and salt")
+    disclose.add_argument("directory", type=Path)
+    disclose.add_argument("output", type=Path)
+    disclose.add_argument("--key", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "keygen":
@@ -26,6 +30,8 @@ def main(argv=None) -> int:
                     args.source, args.directory, load_key(args.key), args.author
                 )
             )
+        elif args.command == "disclose":
+            workflow.disclose(args.directory, args.output, load_key(args.key))
     except (OSError, ValueError) as exc:
         parser.exit(1, f"claim: {exc}\n")
     return 0
