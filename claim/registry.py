@@ -3,7 +3,7 @@ from hashlib import sha256
 from pathlib import Path
 
 from claim import encryption, files, record, timestamp
-from claim.limits import MAX_OPENING_BYTES
+from claim.limits import MAX_OPENING_BYTES, MAX_TIMESTAMP_BYTES
 
 
 def location(root: Path, claim_id: str) -> Path:
@@ -26,3 +26,19 @@ def save_receipt(directory: Path, data: bytes, proof: bytes) -> None:
     receipts = directory / "timestamps"
     receipts.mkdir(mode=0o700, exist_ok=True)
     files.write_private(receipts / (sha256(proof).hexdigest() + ".ots"), proof)
+
+
+def accept(root: Path, source: Path, receipt: Path) -> str:
+    files.require_external(root)
+    data, token = read_submission(source)
+    proof = files.read_limited(receipt, MAX_TIMESTAMP_BYTES)
+    timestamp.parse_receipt(data, proof)
+    claim_id = record.record_id(data)
+    directory = location(root, claim_id)
+    root.mkdir(mode=0o700, exist_ok=True)
+    directory.parent.mkdir(mode=0o700, exist_ok=True)
+    files.create_private_directory(directory)
+    files.write_private(directory / "opening.fernet", token)
+    save_receipt(directory, data, proof)
+    files.write_private(directory / "record.json", data)
+    return claim_id

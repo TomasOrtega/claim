@@ -1,12 +1,22 @@
 import pytest
 
-from claim import registry
+from claim import record, registry
 
 
 @pytest.mark.parametrize("claim_id", ["../secret", "", "A" * 64, "a" * 63])
 def test_invalid_claim_path(tmp_path, claim_id):
     with pytest.raises(ValueError, match="invalid claim ID"):
         registry.location(tmp_path, claim_id)
+
+
+def test_accept(sealed, receipt, tmp_path):
+    root = tmp_path / "registry"
+    claim_id = registry.accept(root, sealed, receipt)
+    entry = registry.location(root, claim_id)
+    assert record.record_id((entry / "record.json").read_bytes()) == claim_id
+    assert (entry / "opening.fernet").read_bytes() == (
+        sealed / "opening.fernet"
+    ).read_bytes()
 
 
 def test_submission(sealed):
