@@ -11,3 +11,8 @@ artifact digest, then the same command for the prefix, salt and binary digest
 concatenated in protocol order. The outer digest was independently checked with
 `shasum -a 256`. Neither calculation used the project's implementation.
 The predictable salt is test data only; real claims need a fresh random salt.
+
+The binary vector uses all byte values from `00` through `ff` in ascending order
+and the same salt. Its commitment is
+`29e7f7bde6b5c74faa69652bfab7ddeeea00a5b15e74d2f35ae790edb4ddd206`.
+It was checked with the same two independent commands.

@@ -44,3 +44,8 @@ def test_reject_altered_salt(offset):
 
 def test_distinct_salts():
     assert commit(ARTIFACT, SALT) != commit(ARTIFACT, bytes(32))
+
+
+def test_binary_vector():
+    expected = "29e7f7bde6b5c74faa69652bfab7ddeeea00a5b15e74d2f35ae790edb4ddd206"
+    assert commit(bytes(range(256)), SALT) == expected
