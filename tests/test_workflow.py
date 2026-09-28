@@ -1,6 +1,6 @@
 import pytest
 
-from claim import commitment, storage, workflow
+from claim import commitment, record, storage, workflow
 
 
 def test_freeze(tmp_path, key):
@@ -16,3 +16,11 @@ def test_corrupt_saved_opening(tmp_path, key, monkeypatch):
     monkeypatch.setattr(storage, "load_opening", lambda *_: (b"corrupt", bytes(32)))
     with pytest.raises(ValueError, match="stored opening does not match"):
         workflow.freeze(source, tmp_path / "opening", key)
+
+
+def test_seal(tmp_path, key):
+    source, directory = tmp_path / "proof", tmp_path / "sealed"
+    source.write_bytes(b"proof")
+    digest = workflow.seal(source, directory, key, ["Alice"])
+    public = record.load_record((directory / "record.json").read_bytes())
+    assert public == record.build_record(digest, ["Alice"])
