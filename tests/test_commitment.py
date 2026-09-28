@@ -1,6 +1,6 @@
 import pytest
 
-from claim.commitment import commit
+from claim.commitment import commit, new_salt
 
 ARTIFACT = b"theorem: 1 + 1 = 2\n"
 SALT = bytes(range(32))
@@ -15,3 +15,10 @@ def test_commitment_vector():
 def test_invalid_salt_length(length):
     with pytest.raises(ValueError, match="salt must be exactly 32 bytes"):
         commit(ARTIFACT, bytes(length))
+
+
+def test_new_salt(monkeypatch):
+    monkeypatch.setattr(
+        "claim.commitment.secrets.token_bytes", lambda n: bytes(range(n))
+    )
+    assert new_salt() == SALT
