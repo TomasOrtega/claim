@@ -21,3 +21,10 @@ def seal(source: Path, directory: Path, key: bytes, authors: list[str]) -> str:
     data = record.dump_record(record.build_record(digest, authors))
     files.write_private(directory / "record.json", data)
     return digest
+
+
+def check_opening(data: bytes, artifact: bytes, salt: bytes) -> str:
+    public = record.load_record(data)
+    if not commitment.verify_opening(artifact, salt, public["commitment"]):
+        raise ValueError("opening does not match record")
+    return public["commitment"]
