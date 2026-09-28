@@ -24,3 +24,9 @@ def test_no_opening_overwrite(saved, key):
     with pytest.raises(FileExistsError):
         storage.save_opening(saved, b"replacement", bytes(32), key)
     assert storage.load_opening(saved, key) == (b"proof", bytes(32))
+
+
+def test_oversized_opening_file(saved, key, monkeypatch):
+    monkeypatch.setattr(storage, "MAX_OPENING_BYTES", saved.stat().st_size - 1)
+    with pytest.raises(ValueError, match="file exceeds size limit"):
+        storage.load_opening(saved, key)
