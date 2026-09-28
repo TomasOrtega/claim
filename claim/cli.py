@@ -1,7 +1,14 @@
 import argparse
+from pathlib import Path
+
+from claim.keys import save_key
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="claim")
-    parser.parse_args(argv)
+    commands = parser.add_subparsers(dest="command", required=True)
+    keygen = commands.add_parser("keygen", help="generate an encryption key")
+    keygen.add_argument("path", type=Path)
+    args = parser.parse_args(argv)
+    save_key(args.path)
     return 0
