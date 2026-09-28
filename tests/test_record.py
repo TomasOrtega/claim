@@ -127,6 +127,12 @@ def test_record_size_boundary(public_record, monkeypatch):
         record.dump_record(public_record)
 
 
+@pytest.mark.parametrize("authors", ["Alice", [], ["Alice", "Alice"]])
+def test_invalid_build(authors):
+    with pytest.raises(ValueError):
+        record.build_record("a" * 64, authors)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
