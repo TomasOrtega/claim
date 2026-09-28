@@ -66,3 +66,9 @@ def test_fresh_encryption_randomness(key):
     assert encryption.encrypt_opening(
         ARTIFACT, SALT, key
     ) != encryption.encrypt_opening(ARTIFACT, SALT, key)
+
+
+def test_oversized_artifact(key, monkeypatch):
+    monkeypatch.setattr(encryption, "MAX_ARTIFACT_BYTES", 3, raising=False)
+    with pytest.raises(ValueError, match="artifact exceeds size limit"):
+        encryption.encrypt_opening(b"four", SALT, key)

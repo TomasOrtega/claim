@@ -1,5 +1,7 @@
 from cryptography.fernet import Fernet
 
+from claim.limits import MAX_ARTIFACT_BYTES
+
 _PREFIX = b"claim:opening:v1\0"
 
 
@@ -8,6 +10,8 @@ def new_key() -> bytes:
 
 
 def encrypt_opening(artifact: bytes, salt: bytes, key: bytes) -> bytes:
+    if len(artifact) > MAX_ARTIFACT_BYTES:
+        raise ValueError("artifact exceeds size limit")
     if len(salt) != 32:
         raise ValueError("salt must be exactly 32 bytes")
     return Fernet(key).encrypt(_PREFIX + salt + artifact)
