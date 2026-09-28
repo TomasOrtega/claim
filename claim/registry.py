@@ -99,6 +99,7 @@ def export(root: Path, output: Path) -> None:
     if output.resolve().is_relative_to(root.resolve()):
         raise ValueError("public output must be outside the registry")
     files.create_private_directory(output)
+    preserve_git_bytes(output)
     entries = [
         export_claim(path, output / path.name)
         for path in sorted((root / "claims").iterdir())

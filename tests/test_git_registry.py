@@ -43,3 +43,9 @@ def git(path, *args):
         check=True,
         capture_output=True,
     )
+
+
+def test_public_attributes(accepted, tmp_path):
+    output = tmp_path / "site"
+    registry.export(accepted[0], output)
+    assert (output / ".gitattributes").read_bytes() == b"* -text\n"
