@@ -13,6 +13,8 @@ def write_private(path: Path, data: bytes) -> None:
 
 
 def read_limited(path: Path, limit: int) -> bytes:
+    if limit < 0:
+        raise ValueError("limit must be nonnegative")
     with path.open("rb") as stream:
         data = stream.read(limit + 1)
     if len(data) > limit:

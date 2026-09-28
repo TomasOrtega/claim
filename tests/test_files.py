@@ -46,3 +46,8 @@ def test_oversized_file(tmp_path, size):
     (tmp_path / "source").write_bytes(bytes(size))
     with pytest.raises(ValueError, match="file exceeds size limit"):
         files.read_limited(tmp_path / "source", 4)
+
+
+def test_negative_read_limit(tmp_path):
+    with pytest.raises(ValueError, match="limit must be nonnegative"):
+        files.read_limited(tmp_path / "missing", -1)
