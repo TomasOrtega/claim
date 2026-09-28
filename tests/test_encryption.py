@@ -19,3 +19,9 @@ def test_generated_key():
 def test_encrypt_opening(key):
     token = encryption.encrypt_opening(ARTIFACT, SALT, key)
     assert Fernet(key).decrypt(token) == b"claim:opening:v1\0" + SALT + ARTIFACT
+
+
+@pytest.mark.parametrize("length", [0, 31, 33])
+def test_invalid_salt(key, length):
+    with pytest.raises(ValueError, match="salt must be exactly 32 bytes"):
+        encryption.encrypt_opening(ARTIFACT, bytes(length), key)
