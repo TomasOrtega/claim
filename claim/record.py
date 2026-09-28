@@ -18,3 +18,5 @@ def validate_record(record: dict) -> None:
         raise ValueError("invalid authors")
     if any(not isinstance(name, str) or not name.strip() for name in authors):
         raise ValueError("invalid author name")
+    if len(set(authors)) != len(authors):
+        raise ValueError("duplicate authors")

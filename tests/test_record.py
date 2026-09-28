@@ -42,6 +42,12 @@ def test_invalid_author(public_record, author):
         record.validate_record(public_record)
 
 
+def test_duplicate_authors(public_record):
+    public_record["authors"] = ["Alice", "Alice"]
+    with pytest.raises(ValueError, match="duplicate authors"):
+        record.validate_record(public_record)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
