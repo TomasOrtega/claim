@@ -10,3 +10,7 @@ def commit(artifact: bytes, salt: bytes) -> str:
 
 def new_salt() -> bytes:
     return secrets.token_bytes(32)
+
+
+def verify_opening(artifact: bytes, salt: bytes, commitment: str) -> bool:
+    return commit(artifact, salt) == commitment

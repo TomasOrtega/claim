@@ -1,6 +1,6 @@
 import pytest
 
-from claim.commitment import commit, new_salt
+from claim.commitment import commit, new_salt, verify_opening
 
 ARTIFACT = b"theorem: 1 + 1 = 2\n"
 SALT = bytes(range(32))
@@ -22,3 +22,7 @@ def test_new_salt(monkeypatch):
         "claim.commitment.secrets.token_bytes", lambda n: bytes(range(n))
     )
     assert new_salt() == SALT
+
+
+def test_verify_opening():
+    assert verify_opening(ARTIFACT, SALT, COMMITMENT)
