@@ -1,9 +1,11 @@
 from hashlib import sha256
 from io import BytesIO
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 from bitcoin import MainParams
+from bitcoin.core import CBlockHeader
 from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAttestation
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import BytesSerializationContext
@@ -52,6 +54,26 @@ def test_upgrade(pending, anchored, monkeypatch):
 
     monkeypatch.setattr(timestamp, "run_ots", provider)
     assert timestamp.upgrade(b"record", pending) == anchored
+
+
+def test_published_vector(node):
+    fixtures = Path(__file__).with_name("fixtures")
+    header = CBlockHeader.deserialize(
+        bytes.fromhex((fixtures / "block-358391.hex").read_text())
+    )
+    node.getblockheader = lambda _: header
+    node.getblockhash = lambda height: (
+        MainParams.GENESIS_BLOCK.GetHash() if height == 0 else header.GetHash()
+    )
+    result = timestamp.verify(
+        (fixtures / "hello-world.txt").read_bytes(),
+        (fixtures / "hello-world.txt.ots").read_bytes(),
+    )
+    assert result == {
+        "status": "verified",
+        "unix_time": 1432827678,
+        "block_height": 358391,
+    }
 
 
 def test_parse_receipt(pending):
