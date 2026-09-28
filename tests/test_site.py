@@ -1,6 +1,11 @@
 from claim import site
 
 
+def test_registry_page():
+    html = site.render({"claims": [], "authors": {"Alice & Bob": 2}})
+    assert "Alice &amp; Bob: 2" in html and "index.json" in html
+
+
 def test_author_escaping():
     entry = {
         "id": "a" * 64,
