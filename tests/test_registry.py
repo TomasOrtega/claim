@@ -19,6 +19,14 @@ def test_accept(sealed, receipt, tmp_path):
     ).read_bytes()
 
 
+def test_duplicate_intake(accepted, sealed, receipt):
+    root, claim_id = accepted
+    before = (registry.location(root, claim_id) / "opening.fernet").read_bytes()
+    with pytest.raises(FileExistsError):
+        registry.accept(root, sealed, receipt)
+    assert (registry.location(root, claim_id) / "opening.fernet").read_bytes() == before
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
