@@ -24,6 +24,15 @@ def test_disclose(sealed, tmp_path, key_file):
     assert (output / "proof").read_bytes() == b"proof\r\n\xff"
 
 
+def test_verify(sealed, tmp_path, key_file):
+    output = tmp_path / "disclosed"
+    assert run("disclose", sealed, output, "--key", key_file).returncode == 0
+    key_file.unlink()
+    result = run("verify", output)
+    assert result.returncode == 0
+    assert "timestamp not checked" in result.stdout
+
+
 def test_seal(tmp_path, key_file):
     source, directory = tmp_path / "proof", tmp_path / "sealed"
     source.write_bytes(b"proof")

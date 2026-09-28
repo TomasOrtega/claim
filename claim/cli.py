@@ -19,6 +19,8 @@ def main(argv=None) -> int:
     disclose.add_argument("directory", type=Path)
     disclose.add_argument("output", type=Path)
     disclose.add_argument("--key", type=Path, required=True)
+    verify = commands.add_parser("verify", help="verify a disclosed opening")
+    verify.add_argument("directory", type=Path)
     args = parser.parse_args(argv)
     try:
         if args.command == "keygen":
@@ -32,6 +34,9 @@ def main(argv=None) -> int:
             )
         elif args.command == "disclose":
             workflow.disclose(args.directory, args.output, load_key(args.key))
+        elif args.command == "verify":
+            workflow.verify(args.directory)
+            print("Opening matches; timestamp not checked.")
     except (OSError, ValueError) as exc:
         parser.exit(1, f"claim: {exc}\n")
     return 0
