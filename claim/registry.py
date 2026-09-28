@@ -12,6 +12,8 @@ def location(root: Path, claim_id: str) -> Path:
 
 
 def read_submission(source: Path) -> tuple[bytes, bytes]:
+    if {p.name for p in source.iterdir()} != {"record.json", "opening.fernet"}:
+        raise ValueError("unexpected submission files")
     data = record.read_record(source / "record.json")
     token = files.read_limited(source / "opening.fernet", MAX_OPENING_BYTES)
     encryption.validate_token(token)

@@ -13,3 +13,9 @@ def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
     assert token == (sealed / "opening.fernet").read_bytes()
+
+
+def test_submission_with_key(sealed, key):
+    (sealed / "key").write_bytes(key)
+    with pytest.raises(ValueError, match="unexpected submission files"):
+        registry.read_submission(sealed)
