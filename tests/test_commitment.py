@@ -64,3 +64,9 @@ def test_line_endings(ending):
 @pytest.mark.parametrize("value", ["", "0" * 64, COMMITMENT.upper(), "é" * 64])
 def test_wrong_commitment(value):
     assert not verify_opening(ARTIFACT, SALT, value)
+
+
+@pytest.mark.parametrize("length", [0, 31, 33])
+def test_invalid_opening_salt_length(length):
+    with pytest.raises(ValueError, match="salt must be exactly 32 bytes"):
+        verify_opening(ARTIFACT, bytes(length), COMMITMENT)
