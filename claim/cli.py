@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cryptography.fernet import InvalidToken
 
-from claim import workflow
+from claim import timestamp_cli, workflow
 from claim.keys import load_key, save_key
 
 
@@ -23,6 +23,7 @@ def main(argv=None) -> int:
     disclose.add_argument("--key", type=Path, required=True)
     verify = commands.add_parser("verify", help="verify a disclosed opening")
     verify.add_argument("directory", type=Path)
+    timestamp_cli.add_commands(commands)
     args = parser.parse_args(argv)
     try:
         if args.command == "keygen":

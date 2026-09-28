@@ -15,6 +15,7 @@ def test_help():
     result = run("--help")
     assert result.returncode == 0
     assert "usage:" in result.stdout
+    assert "verify-time" in result.stdout
 
 
 def test_changed_proof(sealed, tmp_path, key_file):
