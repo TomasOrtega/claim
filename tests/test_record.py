@@ -12,6 +12,12 @@ def test_valid_record(public_record):
     record.validate_record(public_record)
 
 
+def test_record_identity(public_record):
+    data = record.dump_record(public_record)
+    assert len(record.record_id(data)) == 64
+    assert record.record_id(data) != record.record_id(b" " + data)
+
+
 def test_read_record(public_record, tmp_path):
     path = tmp_path / "record.json"
     data = b" \n" + record.dump_record(public_record)

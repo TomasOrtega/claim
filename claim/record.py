@@ -1,5 +1,6 @@
 import json
 import re
+from hashlib import sha256
 from pathlib import Path
 
 from claim.files import read_limited
@@ -61,3 +62,8 @@ def read_record(path: Path) -> bytes:
     data = read_limited(path, MAX_RECORD_BYTES)
     load_record(data)
     return data
+
+
+def record_id(data: bytes) -> str:
+    load_record(data)
+    return sha256(data).hexdigest()
