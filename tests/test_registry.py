@@ -51,6 +51,21 @@ def test_registry_receipts(accepted, receipt):
     assert list(proofs.values()) == [receipt.read_bytes()]
 
 
+def test_receipt_append_is_exclusive(accepted, receipt):
+    root, claim_id = accepted
+    with pytest.raises(FileExistsError):
+        registry.add_receipt(root, claim_id, receipt)
+    assert (
+        len(
+            registry.read_receipts(
+                registry.location(root, claim_id),
+                (registry.location(root, claim_id) / "record.json").read_bytes(),
+            )
+        )
+        == 1
+    )
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()

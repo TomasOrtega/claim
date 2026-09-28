@@ -48,6 +48,12 @@ def save_receipt(directory: Path, data: bytes, proof: bytes) -> None:
     files.write_private(receipts / (sha256(proof).hexdigest() + ".ots"), proof)
 
 
+def add_receipt(root: Path, claim_id: str, proof_path: Path) -> None:
+    directory = location(root, claim_id)
+    data = read_claim(directory)
+    save_receipt(directory, data, files.read_limited(proof_path, MAX_TIMESTAMP_BYTES))
+
+
 def accept(root: Path, source: Path, receipt: Path) -> str:
     files.require_external(root)
     data, token = read_submission(source)
