@@ -1,4 +1,6 @@
+from hashlib import sha256
 from io import BytesIO
+from types import SimpleNamespace
 
 import pytest
 from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAttestation
@@ -27,6 +29,18 @@ def anchored(pending):
     context = BytesSerializationContext()
     receipt.serialize(context)
     return context.getbytes()
+
+
+@pytest.fixture
+def node(monkeypatch):
+    header = SimpleNamespace(
+        hashMerkleRoot=sha256(b"record").digest(), nTime=1234567890
+    )
+    node = SimpleNamespace(
+        getblockhash=lambda _: b"hash", getblockheader=lambda _: header
+    )
+    monkeypatch.setattr(timestamp, "Proxy", lambda **_: node, raising=False)
+    return node
 
 
 def test_parse_receipt(pending):
