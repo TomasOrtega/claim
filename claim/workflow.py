@@ -37,3 +37,11 @@ def disclose(directory: Path, output: Path, key: bytes) -> None:
     files.create_private_directory(output)
     for name, content in {"proof": artifact, "salt": salt, "record.json": data}.items():
         files.write_private(output / name, content)
+
+
+def verify(directory: Path) -> str:
+    return check_opening(
+        files.read_limited(directory / "record.json", MAX_RECORD_BYTES),
+        files.read_limited(directory / "proof", MAX_ARTIFACT_BYTES),
+        files.read_limited(directory / "salt", 32),
+    )

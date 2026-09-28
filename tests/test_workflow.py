@@ -41,6 +41,13 @@ def test_disclose(sealed, tmp_path, key):
     ).read_bytes()
 
 
+def test_verify(sealed, tmp_path, key):
+    output = tmp_path / "disclosed"
+    workflow.disclose(sealed, output, key)
+    public = record.load_record((sealed / "record.json").read_bytes())
+    assert workflow.verify(output) == public["commitment"]
+
+
 def test_record_mismatch(sealed):
     with pytest.raises(ValueError, match="opening does not match record"):
         workflow.check_opening(
