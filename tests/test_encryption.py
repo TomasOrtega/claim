@@ -85,3 +85,10 @@ def test_oversized_payload(key, monkeypatch):
     monkeypatch.setattr(encryption, "MAX_ARTIFACT_BYTES", 3)
     with pytest.raises(ValueError, match="artifact exceeds size limit"):
         encryption.decrypt_opening(token, key)
+
+
+def test_size_boundary(key, monkeypatch):
+    monkeypatch.setattr(encryption, "MAX_ARTIFACT_BYTES", len(ARTIFACT))
+    token = encryption.encrypt_opening(ARTIFACT, SALT, key)
+    monkeypatch.setattr(encryption, "MAX_OPENING_BYTES", len(token))
+    assert encryption.decrypt_opening(token, key) == (ARTIFACT, SALT)
