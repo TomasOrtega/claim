@@ -17,6 +17,14 @@ def test_help():
     assert "usage:" in result.stdout
 
 
+def test_seal(tmp_path, key_file):
+    source, directory = tmp_path / "proof", tmp_path / "sealed"
+    source.write_bytes(b"proof")
+    result = run("seal", source, directory, "--key", key_file, "--author", "Alice")
+    assert result.returncode == 0
+    assert (directory / "record.json").exists()
+
+
 def test_keygen(tmp_path):
     path = tmp_path / "key"
     result = run("keygen", path)
