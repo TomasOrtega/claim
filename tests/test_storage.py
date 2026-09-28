@@ -1,6 +1,7 @@
 import pytest
 
-from claim import encryption, files, storage
+from claim import commitment, encryption, files, record, storage
+from claim.limits import MAX_RECORD_BYTES
 
 
 @pytest.fixture
@@ -38,6 +39,15 @@ def test_source_edits(tmp_path, key):
     storage.save_opening(frozen, files.read_limited(source, 100), bytes(32), key)
     source.write_bytes(b"revised\n")
     assert storage.load_opening(frozen, key) == (b"original\r\n\x00\xff", bytes(32))
+
+
+def test_public_record_opening(saved, tmp_path, key):
+    public = record.build_record(commitment.commit(b"proof", bytes(32)), ["Alice"])
+    path = tmp_path / "record.json"
+    files.write_private(path, record.dump_record(public))
+    reopened = record.load_record(files.read_limited(path, MAX_RECORD_BYTES))
+    artifact, salt = storage.load_opening(saved, key)
+    assert commitment.verify_opening(artifact, salt, reopened["commitment"])
 
 
 def test_backup_recovery(saved, tmp_path, key):
