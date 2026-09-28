@@ -1,3 +1,5 @@
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+
 import pytest
 from cryptography.fernet import Fernet, InvalidToken
 
@@ -36,3 +38,11 @@ def test_wrong_key(key):
     token = encryption.encrypt_opening(ARTIFACT, SALT, key)
     with pytest.raises(InvalidToken):
         encryption.decrypt_opening(token, encryption.new_key())
+
+
+def test_tampered_ciphertext(key):
+    token = encryption.encrypt_opening(ARTIFACT, SALT, key)
+    raw = bytearray(urlsafe_b64decode(token))
+    raw[30] ^= 1
+    with pytest.raises(InvalidToken):
+        encryption.decrypt_opening(urlsafe_b64encode(raw), key)
