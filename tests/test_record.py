@@ -118,6 +118,15 @@ def test_invalid_version_at_boundary(public_record, operation):
         operation(data if operation is record.load_record else public_record)
 
 
+def test_record_size_boundary(public_record, monkeypatch):
+    data = record.dump_record(public_record)
+    monkeypatch.setattr(record, "MAX_RECORD_BYTES", len(data))
+    assert record.dump_record(record.load_record(data)) == data
+    monkeypatch.setattr(record, "MAX_RECORD_BYTES", len(data) - 1)
+    with pytest.raises(ValueError, match="record exceeds size limit"):
+        record.dump_record(public_record)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
