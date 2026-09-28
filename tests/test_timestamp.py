@@ -51,6 +51,14 @@ def test_pending(pending):
     assert timestamp.verify(b"record", pending) == {"status": "pending"}
 
 
+def test_verified_anchor(anchored, node):
+    assert timestamp.verify(b"record", anchored) == {
+        "status": "verified",
+        "unix_time": 1234567890,
+        "block_height": 100,
+    }
+
+
 def test_unverified_anchor(anchored, monkeypatch):
     def unavailable(**_):
         raise ValueError("node unavailable")

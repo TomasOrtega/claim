@@ -1,6 +1,7 @@
 from hashlib import sha256
 
-from opentimestamps.core.notary import BitcoinBlockHeaderAttestation
+from bitcoin.rpc import Proxy
+from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, VerificationError
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import (
     BytesDeserializationContext,
@@ -35,4 +36,16 @@ def verify(data: bytes, proof: bytes) -> dict:
     ]
     if not anchors:
         return {"status": "pending"}
-    raise ValueError("timestamp requires Bitcoin verification")
+    node = Proxy(timeout=10)
+    for message, attestation in sorted(anchors, key=lambda item: item[1].height):
+        try:
+            header = node.getblockheader(node.getblockhash(attestation.height))
+            time = attestation.verify_against_blockheader(message, header)
+        except (VerificationError, IndexError):
+            continue
+        return {
+            "status": "verified",
+            "unix_time": time,
+            "block_height": attestation.height,
+        }
+    raise ValueError("timestamp does not match Bitcoin chain")
