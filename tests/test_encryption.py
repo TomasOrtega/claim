@@ -19,6 +19,12 @@ def test_encrypted_framing(key):
         encryption.validate_token(key)
 
 
+@pytest.mark.parametrize("data", [b"", b"plaintext proof", b"a" * 164, b"!" * 164])
+def test_bad_encrypted_framing(data):
+    with pytest.raises(ValueError):
+        encryption.validate_token(data)
+
+
 def test_encrypt_opening(key):
     token = encryption.encrypt_opening(ARTIFACT, SALT, key)
     assert Fernet(key).decrypt(token) == b"claim:opening:v1\0" + SALT + ARTIFACT
