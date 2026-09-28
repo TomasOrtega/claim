@@ -40,3 +40,7 @@ def test_reject_altered_salt(offset):
     altered = bytearray(SALT)
     altered[offset] ^= 1
     assert not verify_opening(ARTIFACT, bytes(altered), COMMITMENT)
+
+
+def test_distinct_salts():
+    assert commit(ARTIFACT, SALT) != commit(ARTIFACT, bytes(32))
