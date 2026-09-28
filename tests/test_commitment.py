@@ -26,3 +26,10 @@ def test_new_salt(monkeypatch):
 
 def test_verify_opening():
     assert verify_opening(ARTIFACT, SALT, COMMITMENT)
+
+
+@pytest.mark.parametrize("offset", range(len(ARTIFACT)))
+def test_reject_altered_artifact(offset):
+    altered = bytearray(ARTIFACT)
+    altered[offset] ^= 1
+    assert not verify_opening(bytes(altered), SALT, COMMITMENT)
