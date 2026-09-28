@@ -17,6 +17,14 @@ def test_stamp(public, tmp_path, monkeypatch):
     assert output.read_bytes() == b"receipt"
 
 
+def test_verified_time(public, tmp_path, monkeypatch, capsys):
+    proof = tmp_path / "receipt.ots"
+    proof.write_bytes(b"receipt")
+    monkeypatch.setattr(timestamp, "verify", lambda *_: {"status": "verified"})
+    assert cli.main(["verify-time", str(public), str(proof)]) == 0
+    assert '"status": "verified"' in capsys.readouterr().out
+
+
 def test_upgrade(public, tmp_path, monkeypatch):
     proof, output = tmp_path / "old.ots", tmp_path / "new.ots"
     proof.write_bytes(b"original")

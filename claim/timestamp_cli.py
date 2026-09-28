@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from claim import timestamp
@@ -23,4 +24,8 @@ def run(args) -> int:
     elif args.command == "upgrade":
         proof = read_limited(args.proof, MAX_TIMESTAMP_BYTES)
         write_private(args.output, timestamp.upgrade(data, proof))
+    else:
+        result = timestamp.verify(data, read_limited(args.proof, MAX_TIMESTAMP_BYTES))
+        print(json.dumps(result))
+        return 0 if result["status"] == "verified" else 1
     return 0
