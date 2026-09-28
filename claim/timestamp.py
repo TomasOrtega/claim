@@ -48,6 +48,17 @@ def stamp(data: bytes) -> bytes:
         return proof
 
 
+def upgrade(data: bytes, proof: bytes) -> bytes:
+    parse_receipt(data, proof)
+    with TemporaryDirectory(prefix="claim-ots-") as directory:
+        path = Path(directory) / "record.ots"
+        path.write_bytes(proof)
+        run_ots("upgrade", path)
+        upgraded = read_limited(path, MAX_TIMESTAMP_BYTES)
+        parse_receipt(data, upgraded)
+        return upgraded
+
+
 def parse_receipt(data: bytes, proof: bytes) -> DetachedTimestampFile:
     if len(proof) > MAX_TIMESTAMP_BYTES:
         raise ValueError("timestamp exceeds size limit")

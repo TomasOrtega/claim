@@ -45,6 +45,15 @@ def node(monkeypatch):
     return node
 
 
+def test_upgrade(pending, anchored, monkeypatch):
+    def provider(command, path):
+        assert command == "upgrade" and path.read_bytes() == pending
+        path.write_bytes(anchored)
+
+    monkeypatch.setattr(timestamp, "run_ots", provider)
+    assert timestamp.upgrade(b"record", pending) == anchored
+
+
 def test_parse_receipt(pending):
     assert timestamp.parse_receipt(b"record", pending).file_hash_op == OpSHA256()
 
