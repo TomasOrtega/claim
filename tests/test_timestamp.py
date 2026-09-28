@@ -6,7 +6,11 @@ from types import SimpleNamespace
 import pytest
 from bitcoin import MainParams
 from bitcoin.core import CBlockHeader
-from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAttestation
+from opentimestamps.core.notary import (
+    BitcoinBlockHeaderAttestation,
+    PendingAttestation,
+    UnknownAttestation,
+)
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import BytesSerializationContext
 from opentimestamps.core.timestamp import DetachedTimestampFile
@@ -92,6 +96,15 @@ def test_invalid_upgrade(pending, monkeypatch):
     )
     with pytest.raises(ValueError, match="invalid timestamp receipt"):
         timestamp.upgrade(b"record", pending)
+
+
+def test_unknown_attestation(pending):
+    receipt = timestamp.parse_receipt(b"record", pending)
+    receipt.timestamp.attestations = {UnknownAttestation(b"12345678", b"")}
+    context = BytesSerializationContext()
+    receipt.serialize(context)
+    with pytest.raises(ValueError, match="unsupported timestamp attestation"):
+        timestamp.verify(b"record", context.getbytes())
 
 
 def test_parse_receipt(pending):

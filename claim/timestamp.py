@@ -6,7 +6,11 @@ from tempfile import TemporaryDirectory
 
 from bitcoin import MainParams
 from bitcoin.rpc import Proxy
-from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, VerificationError
+from opentimestamps.core.notary import (
+    BitcoinBlockHeaderAttestation,
+    PendingAttestation,
+    VerificationError,
+)
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import (
     BytesDeserializationContext,
@@ -82,6 +86,11 @@ def verify(data: bytes, proof: bytes) -> dict:
         if isinstance(a, BitcoinBlockHeaderAttestation)
     ]
     if not anchors:
+        if not any(
+            isinstance(a, PendingAttestation)
+            for _, a in receipt.timestamp.all_attestations()
+        ):
+            raise ValueError("unsupported timestamp attestation")
         return {"status": "pending"}
     node = Proxy(timeout=10)
     if node.getblockhash(0) != MainParams.GENESIS_BLOCK.GetHash():
