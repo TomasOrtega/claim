@@ -27,7 +27,9 @@ def render(index: dict) -> str:
     )
     return f"""<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Claim registry</title><body><h1>Claim registry</h1>
+<title>Claim registry</title>
+<style>body{{font:16px system-ui;max-width:70rem;margin:3rem auto;padding:0 1rem;color:#222}}table{{width:100%;border-collapse:collapse}}th,td{{padding:.6rem;text-align:left;border-bottom:1px solid #ddd;vertical-align:top}}a{{color:#1255a8}}.claims{{overflow-x:auto}}</style>
+<body><h1>Claim registry</h1>
 <p>Names are self-declared. Verified dates attest to files.</p>
-<table><thead><tr><th>Claim</th><th>Authors</th><th>State</th><th>Timestamp</th><th>Evidence</th></tr></thead><tbody>{rows}</tbody></table>
+<div class="claims"><table><thead><tr><th>Claim</th><th>Authors</th><th>State</th><th>Timestamp</th><th>Evidence</th></tr></thead><tbody>{rows}</tbody></table></div>
 <h2>Claims per name</h2><ul>{counts}</ul><p><a href="index.json">Download index</a></p></body></html>"""
