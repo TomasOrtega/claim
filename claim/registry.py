@@ -28,6 +28,19 @@ def read_claim(directory: Path) -> bytes:
     return data
 
 
+def read_receipts(directory: Path, data: bytes) -> dict[str, bytes]:
+    proofs = {}
+    for path in sorted((directory / "timestamps").iterdir()):
+        proof = files.read_limited(path, MAX_TIMESTAMP_BYTES)
+        if path.name != sha256(proof).hexdigest() + ".ots":
+            raise ValueError("timestamp receipt ID mismatch")
+        timestamp.parse_receipt(data, proof)
+        proofs[path.name] = proof
+    if not proofs:
+        raise ValueError("missing timestamp receipt")
+    return proofs
+
+
 def save_receipt(directory: Path, data: bytes, proof: bytes) -> None:
     timestamp.parse_receipt(data, proof)
     receipts = directory / "timestamps"

@@ -44,6 +44,13 @@ def test_changed_registered_record(accepted):
         registry.read_claim(directory)
 
 
+def test_registry_receipts(accepted, receipt):
+    directory = registry.location(*accepted)
+    data = registry.read_claim(directory)
+    proofs = registry.read_receipts(directory, data)
+    assert list(proofs.values()) == [receipt.read_bytes()]
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
