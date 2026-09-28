@@ -2,4 +2,6 @@ from hashlib import sha256
 
 
 def commit(artifact: bytes, salt: bytes) -> str:
+    if len(salt) != 32:
+        raise ValueError("salt must be exactly 32 bytes")
     return sha256(b"claim:commit:v1\0" + salt + sha256(artifact).digest()).hexdigest()
