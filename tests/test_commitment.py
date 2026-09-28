@@ -33,3 +33,10 @@ def test_reject_altered_artifact(offset):
     altered = bytearray(ARTIFACT)
     altered[offset] ^= 1
     assert not verify_opening(bytes(altered), SALT, COMMITMENT)
+
+
+@pytest.mark.parametrize("offset", range(len(SALT)))
+def test_reject_altered_salt(offset):
+    altered = bytearray(SALT)
+    altered[offset] ^= 1
+    assert not verify_opening(ARTIFACT, bytes(altered), COMMITMENT)
