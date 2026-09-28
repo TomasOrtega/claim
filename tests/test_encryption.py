@@ -54,3 +54,15 @@ def test_tampered_ciphertext(key):
 def test_invalid_payload(key, payload):
     with pytest.raises(ValueError, match="invalid opening format"):
         encryption.decrypt_opening(Fernet(key).encrypt(payload), key)
+
+
+def test_reused_key(key):
+    for artifact in (b"", ARTIFACT, bytes(range(256))):
+        token = encryption.encrypt_opening(artifact, SALT, key)
+        assert encryption.decrypt_opening(token, key) == (artifact, SALT)
+
+
+def test_fresh_encryption_randomness(key):
+    assert encryption.encrypt_opening(
+        ARTIFACT, SALT, key
+    ) != encryption.encrypt_opening(ARTIFACT, SALT, key)
