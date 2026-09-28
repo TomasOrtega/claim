@@ -99,6 +99,14 @@ def test_earliest_timestamp(monkeypatch):
     }
 
 
+def test_public_export(accepted, tmp_path):
+    output = tmp_path / "public"
+    entry = registry.export_claim(registry.location(*accepted), output)
+    assert entry["authors"] == ["Alice"] and entry["timestamp"] == {"status": "pending"}
+    assert {p.name for p in output.iterdir()} == {"record.json", *entry["receipts"]}
+    assert not (output / "opening.fernet").exists()
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()

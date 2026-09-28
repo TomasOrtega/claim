@@ -69,6 +69,22 @@ def timestamp_status(data: bytes, proofs) -> dict:
     return {"status": "pending" if {"status": "pending"} in results else "failed"}
 
 
+def export_claim(directory: Path, output: Path) -> dict:
+    data = read_claim(directory)
+    proofs = read_receipts(directory, data)
+    entry = record.load_record(data) | {
+        "id": directory.name,
+        "status": "sealed",
+        "timestamp": timestamp_status(data, proofs.values()),
+        "receipts": list(proofs),
+    }
+    files.create_private_directory(output)
+    files.write_private(output / "record.json", data)
+    for name, proof in proofs.items():
+        files.write_private(output / name, proof)
+    return entry
+
+
 def accept(root: Path, source: Path, receipt: Path) -> str:
     files.require_external(root)
     data, token = read_submission(source)
