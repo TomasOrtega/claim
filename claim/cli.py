@@ -12,6 +12,7 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     try:
         save_key(args.path)
+        print("Key saved. Keep two secure copies in separate places.")
     except (OSError, ValueError) as exc:
         parser.exit(1, f"claim: {exc}\n")
     return 0

@@ -22,6 +22,7 @@ def test_keygen(tmp_path):
     result = run("keygen", path)
     assert result.returncode == 0
     assert len(path.read_bytes()) == 44
+    assert "two secure copies" in result.stdout
     assert path.read_text() not in result.stdout + result.stderr
 
 
