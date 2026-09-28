@@ -20,3 +20,9 @@ def validate_record(record: dict) -> None:
         raise ValueError("invalid author name")
     if len(set(authors)) != len(authors):
         raise ValueError("duplicate authors")
+
+
+def build_record(commitment: str, authors: list[str]) -> dict:
+    record = {"version": 1, "commitment": commitment, "authors": authors}
+    validate_record(record)
+    return record | {"authors": authors.copy()}

@@ -61,6 +61,10 @@ def test_missing_field(public_record, field):
         record.validate_record(public_record)
 
 
+def test_build_record(public_record):
+    assert record.build_record("a" * 64, ["Alice", "José"]) == public_record
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
