@@ -5,7 +5,7 @@ from subprocess import TimeoutExpired
 from bitcoin.rpc import JSONRPCError
 from cryptography.fernet import InvalidToken
 
-from claim import timestamp_cli, workflow
+from claim import registry_cli, timestamp_cli, workflow
 from claim.keys import load_key, save_key
 
 
@@ -26,6 +26,7 @@ def main(argv=None) -> int:
     verify = commands.add_parser("verify", help="verify a disclosed opening")
     verify.add_argument("directory", type=Path)
     timestamp_cli.add_commands(commands)
+    registry_cli.add_commands(commands)
     args = parser.parse_args(argv)
     try:
         if args.command == "keygen":
