@@ -39,3 +39,10 @@ def test_no_overwrite(tmp_path, symlink):
 def test_bounded_read(tmp_path):
     (tmp_path / "source").write_bytes(b"abcd")
     assert files.read_limited(tmp_path / "source", 4) == b"abcd"
+
+
+@pytest.mark.parametrize("size", [5, 64])
+def test_oversized_file(tmp_path, size):
+    (tmp_path / "source").write_bytes(bytes(size))
+    with pytest.raises(ValueError, match="file exceeds size limit"):
+        files.read_limited(tmp_path / "source", 4)
