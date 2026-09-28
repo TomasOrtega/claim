@@ -27,6 +27,14 @@ def test_duplicate_intake(accepted, sealed, receipt):
     assert (registry.location(root, claim_id) / "opening.fernet").read_bytes() == before
 
 
+def test_invalid_intake_receipt(sealed, receipt, tmp_path):
+    receipt.write_bytes(b"invalid")
+    root = tmp_path / "registry"
+    with pytest.raises(ValueError):
+        registry.accept(root, sealed, receipt)
+    assert not root.exists()
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
