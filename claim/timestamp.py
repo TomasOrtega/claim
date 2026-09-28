@@ -1,5 +1,6 @@
 from hashlib import sha256
 
+from opentimestamps.core.notary import BitcoinBlockHeaderAttestation
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import (
     BytesDeserializationContext,
@@ -23,3 +24,15 @@ def parse_receipt(data: bytes, proof: bytes) -> DetachedTimestampFile:
     ):
         raise ValueError("timestamp does not match record")
     return receipt
+
+
+def verify(data: bytes, proof: bytes) -> dict:
+    receipt = parse_receipt(data, proof)
+    anchors = [
+        (msg, a)
+        for msg, a in receipt.timestamp.all_attestations()
+        if isinstance(a, BitcoinBlockHeaderAttestation)
+    ]
+    if not anchors:
+        return {"status": "pending"}
+    raise ValueError("timestamp requires Bitcoin verification")
