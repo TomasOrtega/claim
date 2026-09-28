@@ -55,6 +55,11 @@ def test_ots_client(pending, tmp_path):
     timestamp.run_ots("info", path)
 
 
+def test_ots_client_error(tmp_path):
+    with pytest.raises(ValueError, match="timestamp info failed"):
+        timestamp.run_ots("info", tmp_path / "missing")
+
+
 def test_pending(pending):
     assert timestamp.verify(b"record", pending) == {"status": "pending"}
 
