@@ -84,6 +84,10 @@ def test_oversized_output(public_record, monkeypatch):
         record.dump_record(public_record)
 
 
+def test_load_record(public_record):
+    assert record.load_record(record.dump_record(public_record)) == public_record
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
