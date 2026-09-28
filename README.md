@@ -15,8 +15,8 @@ This project is inspired by Gonzalo Cao-Labora's tweets: https://x.com/GonZalocl
 
 The library creates commitments, saves encrypted proofs with their salts, and
 builds public records with self-declared author names. Use the [CLI](docs/storage.md)
-to seal, disclose and verify claims. Timestamps, the registry and Lean checks are
-next. See the [protocol](docs/protocol.md).
+to seal, disclose and verify claims, and [timestamp](docs/timestamps.md) public
+records. The registry and Lean checks are next. See the [protocol](docs/protocol.md).
 
 Run Python examples from this checkout with `uv run python`:
 
