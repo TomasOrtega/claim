@@ -27,3 +27,9 @@ def test_parse_receipt(pending):
 def test_changed_record(pending):
     with pytest.raises(ValueError, match="timestamp does not match record"):
         timestamp.parse_receipt(b"changed", pending)
+
+
+@pytest.mark.parametrize("proof", [b"", b"invalid"])
+def test_invalid_receipt(proof):
+    with pytest.raises(ValueError, match="invalid timestamp receipt"):
+        timestamp.parse_receipt(b"record", proof)
