@@ -1,6 +1,15 @@
 from claim import cli
 
 
+def test_add_receipt_command(accepted, receipt):
+    root, claim_id = accepted
+    receipt.write_bytes(
+        receipt.read_bytes().replace(b"https://a.pool.", b"https://b.pool.")
+    )
+    assert cli.main(["add-receipt", str(root), claim_id, str(receipt)]) == 0
+    assert len(list((root / "claims" / claim_id / "timestamps").iterdir())) == 2
+
+
 def test_export_command(accepted, tmp_path):
     root, _ = accepted
     output = tmp_path / "public"
