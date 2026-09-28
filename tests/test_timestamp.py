@@ -86,6 +86,14 @@ def test_wrong_calendar_receipt(pending, monkeypatch):
         timestamp.stamp(b"different record")
 
 
+def test_invalid_upgrade(pending, monkeypatch):
+    monkeypatch.setattr(
+        timestamp, "run_ots", lambda _, path: path.write_bytes(b"invalid")
+    )
+    with pytest.raises(ValueError, match="invalid timestamp receipt"):
+        timestamp.upgrade(b"record", pending)
+
+
 def test_parse_receipt(pending):
     assert timestamp.parse_receipt(b"record", pending).file_hash_op == OpSHA256()
 
