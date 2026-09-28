@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
+from subprocess import TimeoutExpired
 
+from bitcoin.rpc import JSONRPCError
 from cryptography.fernet import InvalidToken
 
 from claim import timestamp_cli, workflow
@@ -44,6 +46,6 @@ def main(argv=None) -> int:
             return timestamp_cli.run(args)
     except InvalidToken:
         parser.exit(1, "claim: invalid key or encrypted opening\n")
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, TimeoutExpired, JSONRPCError) as exc:
         parser.exit(1, f"claim: {exc}\n")
     return 0

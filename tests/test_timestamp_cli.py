@@ -1,4 +1,7 @@
+from subprocess import TimeoutExpired
+
 import pytest
+from bitcoin.rpc import JSONRPCError
 
 from claim import cli, record, timestamp
 
@@ -8,6 +11,22 @@ def public(tmp_path):
     path = tmp_path / "record.json"
     path.write_bytes(record.dump_record(record.build_record("a" * 64, ["Alice"])))
     return path
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        TimeoutExpired("ots", 60),
+        JSONRPCError({"code": -1, "message": "node unavailable"}),
+    ],
+)
+def test_provider_failure(public, tmp_path, monkeypatch, error):
+    def fail(*_):
+        raise error
+
+    monkeypatch.setattr(timestamp, "stamp", fail)
+    with pytest.raises(SystemExit, match="1"):
+        cli.main(["stamp", str(public), str(tmp_path / "receipt.ots")])
 
 
 def test_stamp(public, tmp_path, monkeypatch):
