@@ -1,6 +1,8 @@
 import json
 import re
+from pathlib import Path
 
+from claim.files import read_limited
 from claim.limits import MAX_RECORD_BYTES
 
 
@@ -53,3 +55,9 @@ def load_record(data: bytes) -> dict:
     record = json.loads(data.decode("utf-8"), object_pairs_hook=_unique_object)
     validate_record(record)
     return record
+
+
+def read_record(path: Path) -> bytes:
+    data = read_limited(path, MAX_RECORD_BYTES)
+    load_record(data)
+    return data

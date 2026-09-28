@@ -12,6 +12,13 @@ def test_valid_record(public_record):
     record.validate_record(public_record)
 
 
+def test_read_record(public_record, tmp_path):
+    path = tmp_path / "record.json"
+    data = b" \n" + record.dump_record(public_record)
+    path.write_bytes(data)
+    assert record.read_record(path) == data
+
+
 @pytest.mark.parametrize("version", [0, 2, True, 1.0, "1", None])
 def test_invalid_version(public_record, version):
     public_record["version"] = version
