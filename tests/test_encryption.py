@@ -25,3 +25,8 @@ def test_encrypt_opening(key):
 def test_invalid_salt(key, length):
     with pytest.raises(ValueError, match="salt must be exactly 32 bytes"):
         encryption.encrypt_opening(ARTIFACT, bytes(length), key)
+
+
+def test_decrypt_opening(key):
+    token = encryption.encrypt_opening(ARTIFACT, SALT, key)
+    assert encryption.decrypt_opening(token, key) == (ARTIFACT, SALT)
