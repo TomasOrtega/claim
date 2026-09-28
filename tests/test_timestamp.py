@@ -1,7 +1,7 @@
 from io import BytesIO
 
 import pytest
-from opentimestamps.core.notary import PendingAttestation
+from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAttestation
 from opentimestamps.core.op import OpSHA256
 from opentimestamps.core.serialize import BytesSerializationContext
 from opentimestamps.core.timestamp import DetachedTimestampFile
@@ -15,6 +15,15 @@ def pending():
     receipt.timestamp.attestations.add(
         PendingAttestation("https://a.pool.opentimestamps.org")
     )
+    context = BytesSerializationContext()
+    receipt.serialize(context)
+    return context.getbytes()
+
+
+@pytest.fixture
+def anchored(pending):
+    receipt = timestamp.parse_receipt(b"record", pending)
+    receipt.timestamp.attestations.add(BitcoinBlockHeaderAttestation(100))
     context = BytesSerializationContext()
     receipt.serialize(context)
     return context.getbytes()
