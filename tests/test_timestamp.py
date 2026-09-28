@@ -33,3 +33,11 @@ def test_changed_record(pending):
 def test_invalid_receipt(proof):
     with pytest.raises(ValueError, match="invalid timestamp receipt"):
         timestamp.parse_receipt(b"record", proof)
+
+
+def test_receipt_bounds(pending, monkeypatch):
+    with pytest.raises(ValueError):
+        timestamp.parse_receipt(b"record", pending + b"trailing")
+    monkeypatch.setattr(timestamp, "MAX_TIMESTAMP_BYTES", len(pending) - 1)
+    with pytest.raises(ValueError, match="timestamp exceeds size limit"):
+        timestamp.parse_receipt(b"record", pending)
