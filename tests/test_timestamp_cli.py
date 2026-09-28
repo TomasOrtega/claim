@@ -17,6 +17,13 @@ def test_stamp(public, tmp_path, monkeypatch):
     assert output.read_bytes() == b"receipt"
 
 
+def test_pending_time(public, tmp_path, monkeypatch):
+    proof = tmp_path / "receipt.ots"
+    proof.write_bytes(b"receipt")
+    monkeypatch.setattr(timestamp, "verify", lambda *_: {"status": "pending"})
+    assert cli.main(["verify-time", str(public), str(proof)]) == 1
+
+
 def test_verified_time(public, tmp_path, monkeypatch, capsys):
     proof = tmp_path / "receipt.ots"
     proof.write_bytes(b"receipt")
