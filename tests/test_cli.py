@@ -17,6 +17,24 @@ def test_help():
     assert "usage:" in result.stdout
 
 
+def test_reuse_key(sealed, tmp_path, key_file):
+    second, output = tmp_path / "second", tmp_path / "disclosed"
+    assert (
+        run(
+            "seal", tmp_path / "proof", second, "--key", key_file, "--author", "Alice"
+        ).returncode
+        == 0
+    )
+    assert run("disclose", sealed, output, "--key", key_file).returncode == 0
+    assert (
+        run(
+            "disclose", second, tmp_path / "second-disclosure", "--key", key_file
+        ).returncode
+        == 0
+    )
+    assert run("verify", output).returncode == 0
+
+
 def test_backup_key_recovery(sealed, tmp_path, key_file):
     backup = tmp_path / "backup-key"
     backup.write_bytes(key_file.read_bytes())
