@@ -19,6 +19,10 @@ def add_commands(commands) -> None:
 
 def run(args) -> int:
     data = read_record(args.record)
+    if args.command != "verify-time" and (
+        args.output.exists() or args.output.is_symlink()
+    ):
+        raise FileExistsError("output already exists")
     if args.command == "stamp":
         write_private(args.output, timestamp.stamp(data))
     elif args.command == "upgrade":

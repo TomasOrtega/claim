@@ -13,6 +13,17 @@ def public(tmp_path):
     return path
 
 
+def test_no_timestamp_overwrite(public, tmp_path, monkeypatch):
+    output = tmp_path / "receipt.ots"
+    output.write_bytes(b"original")
+    monkeypatch.setattr(
+        timestamp, "stamp", lambda _: pytest.fail("existing output reached provider")
+    )
+    with pytest.raises(SystemExit, match="1"):
+        cli.main(["stamp", str(public), str(output)])
+    assert output.read_bytes() == b"original"
+
+
 @pytest.mark.parametrize(
     "error",
     [
