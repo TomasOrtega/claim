@@ -17,6 +17,15 @@ def test_help():
     assert "usage:" in result.stdout
 
 
+def test_changed_proof(sealed, tmp_path, key_file):
+    output = tmp_path / "disclosed"
+    assert run("disclose", sealed, output, "--key", key_file).returncode == 0
+    (output / "proof").write_bytes(b"changed")
+    result = run("verify", output)
+    assert result.returncode == 1 and result.stdout == ""
+    assert "opening does not match" in result.stderr
+
+
 def test_reuse_key(sealed, tmp_path, key_file):
     second, output = tmp_path / "second", tmp_path / "disclosed"
     assert (
