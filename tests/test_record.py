@@ -71,6 +71,13 @@ def test_author_snapshot(public_record):
     assert built["authors"] == ["Alice", "José"]
 
 
+def test_dump_record(public_record):
+    expected = (
+        '{"authors":["Alice","José"],"commitment":"' + "a" * 64 + '","version":1}\n'
+    )
+    assert record.dump_record(public_record) == expected.encode("utf-8")
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):

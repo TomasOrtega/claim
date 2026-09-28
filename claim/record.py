@@ -1,3 +1,4 @@
+import json
 import re
 
 
@@ -26,3 +27,9 @@ def build_record(commitment: str, authors: list[str]) -> dict:
     record = {"version": 1, "commitment": commitment, "authors": authors}
     validate_record(record)
     return record | {"authors": authors.copy()}
+
+
+def dump_record(record: dict) -> bytes:
+    validate_record(record)
+    text = json.dumps(record, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return (text + "\n").encode("utf-8")
