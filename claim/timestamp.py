@@ -2,6 +2,7 @@ import subprocess
 import sys
 from hashlib import sha256
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from bitcoin import MainParams
 from bitcoin.rpc import Proxy
@@ -13,6 +14,7 @@ from opentimestamps.core.serialize import (
 )
 from opentimestamps.core.timestamp import DetachedTimestampFile
 
+from claim.files import read_limited
 from claim.limits import MAX_TIMESTAMP_BYTES
 
 
@@ -34,6 +36,16 @@ def run_ots(command: str, path: Path) -> None:
     )
     if result.returncode:
         raise ValueError(f"timestamp {command} failed: {result.stderr.strip()}")
+
+
+def stamp(data: bytes) -> bytes:
+    with TemporaryDirectory(prefix="claim-ots-") as directory:
+        path = Path(directory) / "record"
+        path.write_bytes(data)
+        run_ots("stamp", path)
+        proof = read_limited(path.with_suffix(".ots"), MAX_TIMESTAMP_BYTES)
+        parse_receipt(data, proof)
+        return proof
 
 
 def parse_receipt(data: bytes, proof: bytes) -> DetachedTimestampFile:

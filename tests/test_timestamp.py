@@ -60,6 +60,15 @@ def test_ots_client_error(tmp_path):
         timestamp.run_ots("info", tmp_path / "missing")
 
 
+def test_stamp(pending, monkeypatch):
+    def provider(command, path):
+        assert command == "stamp" and path.read_bytes() == b"record"
+        path.with_suffix(".ots").write_bytes(pending)
+
+    monkeypatch.setattr(timestamp, "run_ots", provider)
+    assert timestamp.stamp(b"record") == pending
+
+
 def test_pending(pending):
     assert timestamp.verify(b"record", pending) == {"status": "pending"}
 
