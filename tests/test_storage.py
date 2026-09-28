@@ -38,3 +38,16 @@ def test_source_edits(tmp_path, key):
     storage.save_opening(frozen, files.read_limited(source, 100), bytes(32), key)
     source.write_bytes(b"revised\n")
     assert storage.load_opening(frozen, key) == (b"original\r\n\x00\xff", bytes(32))
+
+
+def test_backup_recovery(saved, tmp_path, key):
+    backup = tmp_path / "backup"
+    files.create_private_directory(backup)
+    files.write_private(backup / "key", key)
+    files.write_private(backup / "opening", saved.read_bytes())
+    saved.unlink()
+    recovered_key = files.read_limited(backup / "key", 44)
+    assert storage.load_opening(backup / "opening", recovered_key) == (
+        b"proof",
+        bytes(32),
+    )
