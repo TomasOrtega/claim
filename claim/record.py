@@ -16,3 +16,5 @@ def validate_record(record: dict) -> None:
     authors = record["authors"]
     if not isinstance(authors, list) or not authors:
         raise ValueError("invalid authors")
+    if any(not isinstance(name, str) or not name.strip() for name in authors):
+        raise ValueError("invalid author name")

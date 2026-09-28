@@ -35,6 +35,13 @@ def test_invalid_author_list(public_record, authors):
         record.validate_record(public_record)
 
 
+@pytest.mark.parametrize("author", [None, 1, {}, [], "", " \t\n", "\u2003"])
+def test_invalid_author(public_record, author):
+    public_record["authors"] = [author]
+    with pytest.raises(ValueError, match="invalid author name"):
+        record.validate_record(public_record)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
