@@ -22,3 +22,8 @@ def pending():
 
 def test_parse_receipt(pending):
     assert timestamp.parse_receipt(b"record", pending).file_hash_op == OpSHA256()
+
+
+def test_changed_record(pending):
+    with pytest.raises(ValueError, match="timestamp does not match record"):
+        timestamp.parse_receipt(b"changed", pending)
