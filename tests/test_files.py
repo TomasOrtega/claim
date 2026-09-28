@@ -1,0 +1,7 @@
+from claim import files
+
+
+def test_private_directory(tmp_path):
+    path = tmp_path / "private"
+    files.create_private_directory(path)
+    assert path.stat().st_mode & 0o777 == 0o700
