@@ -102,6 +102,14 @@ def test_duplicate_json_key(public_record):
         record.load_record(data)
 
 
+@pytest.mark.parametrize(
+    "data", [b"", b"\xff", b"{}", b"[]", b"null", b"{}{}", "{}".encode("utf-16")]
+)
+def test_malformed_record(data):
+    with pytest.raises(ValueError):
+        record.load_record(data)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
