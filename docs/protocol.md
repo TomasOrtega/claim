@@ -31,3 +31,10 @@ extra fields, unknown versions, wrong types and invalid encodings.
 The record ID is the lowercase hex SHA-256 of the final envelope bytes.
 Timestamp those bytes; edits require a new record and timestamp. Verify signatures
 against the original body bytes. Check key-to-person identities separately.
+
+## Disclosure
+
+Publish the signed record, ID, timestamp evidence and status. Keep the artifact,
+salt, unsalted artifact hash and theorem metadata private until disclosure.
+Disclose the original artifact and salt alongside the record and timestamp proof.
+Keep signing keys private. Revised proofs need new commitments.
