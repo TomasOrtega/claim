@@ -19,3 +19,10 @@ def test_submission_with_key(sealed, key):
     (sealed / "key").write_bytes(key)
     with pytest.raises(ValueError, match="unexpected submission files"):
         registry.read_submission(sealed)
+
+
+def test_save_receipt(sealed, receipt, tmp_path):
+    data = (sealed / "record.json").read_bytes()
+    registry.save_receipt(tmp_path, data, receipt.read_bytes())
+    paths = list((tmp_path / "timestamps").glob("*.ots"))
+    assert len(paths) == 1 and paths[0].read_bytes() == receipt.read_bytes()

@@ -1,7 +1,8 @@
 import re
+from hashlib import sha256
 from pathlib import Path
 
-from claim import encryption, files, record
+from claim import encryption, files, record, timestamp
 from claim.limits import MAX_OPENING_BYTES
 
 
@@ -18,3 +19,10 @@ def read_submission(source: Path) -> tuple[bytes, bytes]:
     token = files.read_limited(source / "opening.fernet", MAX_OPENING_BYTES)
     encryption.validate_token(token)
     return data, token
+
+
+def save_receipt(directory: Path, data: bytes, proof: bytes) -> None:
+    timestamp.parse_receipt(data, proof)
+    receipts = directory / "timestamps"
+    receipts.mkdir(mode=0o700, exist_ok=True)
+    files.write_private(receipts / (sha256(proof).hexdigest() + ".ots"), proof)
