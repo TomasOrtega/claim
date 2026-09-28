@@ -1,5 +1,5 @@
 import pytest
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 from claim import encryption
 
@@ -30,3 +30,9 @@ def test_invalid_salt(key, length):
 def test_decrypt_opening(key):
     token = encryption.encrypt_opening(ARTIFACT, SALT, key)
     assert encryption.decrypt_opening(token, key) == (ARTIFACT, SALT)
+
+
+def test_wrong_key(key):
+    token = encryption.encrypt_opening(ARTIFACT, SALT, key)
+    with pytest.raises(InvalidToken):
+        encryption.decrypt_opening(token, encryption.new_key())
