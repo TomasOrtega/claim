@@ -16,3 +16,7 @@ The binary vector uses all byte values from `00` through `ff` in ascending order
 and the same salt. Its commitment is
 `29e7f7bde6b5c74faa69652bfab7ddeeea00a5b15e74d2f35ae790edb4ddd206`.
 It was checked with the same two independent commands.
+
+The empty artifact with the same salt has commitment
+`3032a9ffc8b79fcab4ad38b074cf833c8441ebb04be52bf6823ab43946f0477a`,
+also checked with both commands.

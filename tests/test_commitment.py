@@ -49,3 +49,8 @@ def test_distinct_salts():
 def test_binary_vector():
     expected = "29e7f7bde6b5c74faa69652bfab7ddeeea00a5b15e74d2f35ae790edb4ddd206"
     assert commit(bytes(range(256)), SALT) == expected
+
+
+def test_empty_vector():
+    expected = "3032a9ffc8b79fcab4ad38b074cf833c8441ebb04be52bf6823ab43946f0477a"
+    assert commit(b"", SALT) == expected
