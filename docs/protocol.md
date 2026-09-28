@@ -38,3 +38,12 @@ Publish the signed record, ID, timestamp evidence and status. Keep the artifact,
 salt, unsalted artifact hash and theorem metadata private until disclosure.
 Disclose the original artifact and salt alongside the record and timestamp proof.
 Keep signing keys private. Revised proofs need new commitments.
+
+## Status (planned)
+
+Claims start sealed. Append signed disclosure or withdrawal events without
+changing the original record or erasing quota history.
+
+Timestamp status is pending, verified or failed. Only independent verification
+establishes the attested date; registry receipt time is separate.
+Label private Lean checks as author-reported until independently checked.
