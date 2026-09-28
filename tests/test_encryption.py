@@ -46,3 +46,11 @@ def test_tampered_ciphertext(key):
     raw[30] ^= 1
     with pytest.raises(InvalidToken):
         encryption.decrypt_opening(urlsafe_b64encode(raw), key)
+
+
+@pytest.mark.parametrize(
+    "payload", [b"", b"claim:opening:v2\0" + SALT, b"claim:opening:v1\0" + SALT[:-1]]
+)
+def test_invalid_payload(key, payload):
+    with pytest.raises(ValueError, match="invalid opening format"):
+        encryption.decrypt_opening(Fernet(key).encrypt(payload), key)
