@@ -89,6 +89,16 @@ def test_failed_registry_status(monkeypatch):
     assert registry.timestamp_status(b"record", [b"proof"]) == {"status": "failed"}
 
 
+def test_earliest_timestamp(monkeypatch):
+    monkeypatch.setattr(
+        timestamp, "verify", lambda _, proof: {"status": "verified", "unix_time": proof}
+    )
+    assert registry.timestamp_status(b"record", [20, 10]) == {
+        "status": "verified",
+        "unix_time": 10,
+    }
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
