@@ -21,6 +21,13 @@ def read_submission(source: Path) -> tuple[bytes, bytes]:
     return data, token
 
 
+def read_claim(directory: Path) -> bytes:
+    data = record.read_record(directory / "record.json")
+    if record.record_id(data) != directory.name:
+        raise ValueError("record ID mismatch")
+    return data
+
+
 def save_receipt(directory: Path, data: bytes, proof: bytes) -> None:
     timestamp.parse_receipt(data, proof)
     receipts = directory / "timestamps"

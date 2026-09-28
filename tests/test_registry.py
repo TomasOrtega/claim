@@ -35,6 +35,15 @@ def test_invalid_intake_receipt(sealed, receipt, tmp_path):
     assert not root.exists()
 
 
+def test_changed_registered_record(accepted):
+    root, claim_id = accepted
+    directory = registry.location(root, claim_id)
+    path = directory / "record.json"
+    path.write_bytes(b" " + path.read_bytes())
+    with pytest.raises(ValueError, match="record ID mismatch"):
+        registry.read_claim(directory)
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
