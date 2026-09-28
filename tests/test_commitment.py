@@ -54,3 +54,8 @@ def test_binary_vector():
 def test_empty_vector():
     expected = "3032a9ffc8b79fcab4ad38b074cf833c8441ebb04be52bf6823ab43946f0477a"
     assert commit(b"", SALT) == expected
+
+
+@pytest.mark.parametrize("ending", [b"", b"\r\n"])
+def test_line_endings(ending):
+    assert not verify_opening(ARTIFACT[:-1] + ending, SALT, COMMITMENT)
