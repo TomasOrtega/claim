@@ -48,6 +48,12 @@ def test_duplicate_authors(public_record):
         record.validate_record(public_record)
 
 
+@pytest.mark.parametrize("field", ["salt", "artifact", "key", "filename"])
+def test_extra_field(public_record, field):
+    with pytest.raises(ValueError, match="invalid record fields"):
+        record.validate_record(public_record | {field: "private"})
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
