@@ -16,32 +16,35 @@ artifact bytes unchanged, including line endings. Empty and binary inputs work.
 Generate salts with `secrets.token_bytes(32)`; other lengths raise `ValueError`.
 Opening recomputes `C` and checks for an exact match.
 
-## Signed records (planned)
+## Public records
 
-The UTF-8 JSON body contains `version: 1`, `commitment` and `authors`.
-Each author has a nonempty `name` and an Ed25519 `public_key` (64 lowercase hex
-characters). Require at least one author and unique keys. Every author signs
-`b"claim:record:v1\0" + body_bytes`.
+A UTF-8 JSON record contains `version: 1`, `commitment` and `authors`, a nonempty
+list of distinct, nonblank names. Names are self-declared; there are no accounts
+or identity checks. Reject duplicate JSON keys, extra fields and invalid types.
+Timestamp the exact record bytes to bind the claimed names and commitment.
 
-The JSON envelope contains `body` (standard base64 of the original bytes) and
-`signatures`, each with `public_key` and `signature` (128 lowercase hex characters).
-Require exactly one valid signature per author. Reject duplicate JSON keys,
-extra fields, unknown versions, wrong types and invalid encodings.
+## Encrypted storage
 
-The record ID is the lowercase hex SHA-256 of the final envelope bytes.
-Timestamp those bytes; edits require a new record and timestamp. Verify signatures
-against the original body bytes. Check key-to-person identities separately.
+One researcher key can encrypt many projects. Use Fernet from `cryptography` to
+encrypt `b"claim:opening:v1\0" || S || A`. Its library supplies fresh randomness
+and checks authentication before decryption. The format exposes ciphertext length
+and encryption time, not the proof or salt. [Fernet format](https://cryptography.io/en/stable/fernet/)
+
+Generate the key with `Fernet.generate_key()`. Keep two secure copies in separate
+places, such as a password manager and an encrypted backup. Never put it in the
+project repository or publish it. Losing every copy makes encrypted claims
+unrecoverable. This is an encryption key, not a signing key or a commitment salt.
 
 ## Disclosure
 
-Publish the signed record, ID, timestamp evidence and status. Keep the artifact,
+Publish the record, timestamp evidence and status. Keep the artifact,
 salt, unsalted artifact hash and theorem metadata private until disclosure.
 Disclose the original artifact and salt alongside the record and timestamp proof.
-Keep signing keys private. Revised proofs need new commitments.
+Keep the encryption key private. Revised proofs need new commitments.
 
 ## Status (planned)
 
-Claims start sealed. Append signed disclosure or withdrawal events without
+Claims start sealed. Append disclosure or withdrawal events without
 changing the original record or erasing quota history.
 
 Timestamp status is pending, verified or failed. Only independent verification
