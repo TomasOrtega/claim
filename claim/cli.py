@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 
+from cryptography.fernet import InvalidToken
+
 from claim import workflow
 from claim.keys import load_key, save_key
 
@@ -37,6 +39,8 @@ def main(argv=None) -> int:
         elif args.command == "verify":
             workflow.verify(args.directory)
             print("Opening matches; timestamp not checked.")
+    except InvalidToken:
+        parser.exit(1, "claim: invalid key or encrypted opening\n")
     except (OSError, ValueError) as exc:
         parser.exit(1, f"claim: {exc}\n")
     return 0

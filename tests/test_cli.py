@@ -17,6 +17,14 @@ def test_help():
     assert "usage:" in result.stdout
 
 
+def test_wrong_key(sealed, tmp_path):
+    path = tmp_path / "other-key"
+    assert run("keygen", path).returncode == 0
+    result = run("disclose", sealed, tmp_path / "output", "--key", path)
+    assert result.returncode == 1 and "Traceback" not in result.stderr
+    assert not (tmp_path / "output").exists()
+
+
 def test_disclose(sealed, tmp_path, key_file):
     output = tmp_path / "disclosed"
     result = run("disclose", sealed, output, "--key", key_file)
