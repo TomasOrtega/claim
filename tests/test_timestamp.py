@@ -37,6 +37,11 @@ def test_pending(pending):
     assert timestamp.verify(b"record", pending) == {"status": "pending"}
 
 
+def test_unverified_anchor(anchored):
+    with pytest.raises(ValueError):
+        timestamp.verify(b"record", anchored)
+
+
 def test_changed_record(pending):
     with pytest.raises(ValueError, match="timestamp does not match record"):
         timestamp.parse_receipt(b"changed", pending)
