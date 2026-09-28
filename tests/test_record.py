@@ -110,6 +110,14 @@ def test_malformed_record(data):
         record.load_record(data)
 
 
+@pytest.mark.parametrize("operation", [record.dump_record, record.load_record])
+def test_invalid_version_at_boundary(public_record, operation):
+    data = record.dump_record(public_record).replace(b'"version":1', b'"version":2')
+    public_record["version"] = 2
+    with pytest.raises(ValueError, match="unsupported record version"):
+        operation(data if operation is record.load_record else public_record)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
