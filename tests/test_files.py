@@ -34,3 +34,8 @@ def test_no_overwrite(tmp_path, symlink):
     with pytest.raises(FileExistsError):
         files.write_private(path, b"replacement")
     assert target.read_bytes() == b"original"
+
+
+def test_bounded_read(tmp_path):
+    (tmp_path / "source").write_bytes(b"abcd")
+    assert files.read_limited(tmp_path / "source", 4) == b"abcd"
