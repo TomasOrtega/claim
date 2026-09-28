@@ -8,3 +8,5 @@ Ideally, this repo removes (or dampens) the incentive to publish raw AI-generate
 3. Ideally include a Lean verification.
 4. Reveal only the commitment authors, not their contents, to discourage mass speculative claims.
 5. Allow later disclosure of the key/proof to establish independent discovery if someone else publishes first.
+
+This project is inspired by Gonzalo Cao-Labora's tweets: https://x.com/GonZalocla/status/2104615564291563591.
