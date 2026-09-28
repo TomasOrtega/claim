@@ -48,6 +48,15 @@ def test_verify(sealed, tmp_path, key):
     assert workflow.verify(output) == public["commitment"]
 
 
+@pytest.mark.parametrize("name", ["proof", "salt", "record.json"])
+def test_altered_disclosure(sealed, tmp_path, key, name):
+    output = tmp_path / "disclosed"
+    workflow.disclose(sealed, output, key)
+    (output / name).write_bytes(b"changed")
+    with pytest.raises(ValueError):
+        workflow.verify(output)
+
+
 def test_record_mismatch(sealed):
     with pytest.raises(ValueError, match="opening does not match record"):
         workflow.check_opening(
