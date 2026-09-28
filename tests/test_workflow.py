@@ -57,6 +57,14 @@ def test_altered_disclosure(sealed, tmp_path, key, name):
         workflow.verify(output)
 
 
+def test_mismatched_export(sealed, tmp_path, key):
+    path = sealed / "record.json"
+    path.write_bytes(record.dump_record(record.build_record("0" * 64, ["Alice"])))
+    with pytest.raises(ValueError, match="opening does not match record"):
+        workflow.disclose(sealed, tmp_path / "disclosed", key)
+    assert not (tmp_path / "disclosed").exists()
+
+
 def test_record_mismatch(sealed):
     with pytest.raises(ValueError, match="opening does not match record"):
         workflow.check_opening(
