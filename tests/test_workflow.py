@@ -24,3 +24,8 @@ def test_seal(tmp_path, key):
     digest = workflow.seal(source, directory, key, ["Alice"])
     public = record.load_record((directory / "record.json").read_bytes())
     assert public == record.build_record(digest, ["Alice"])
+
+
+def test_existing_claim_directory(tmp_path, key):
+    with pytest.raises(FileExistsError):
+        workflow.seal(tmp_path / "missing", tmp_path, key, ["Alice"])
