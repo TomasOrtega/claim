@@ -65,6 +65,12 @@ def test_build_record(public_record):
     assert record.build_record("a" * 64, ["Alice", "José"]) == public_record
 
 
+def test_author_snapshot(public_record):
+    built = record.build_record(public_record["commitment"], public_record["authors"])
+    public_record["authors"].clear()
+    assert built["authors"] == ["Alice", "José"]
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):
