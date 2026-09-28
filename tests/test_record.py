@@ -19,6 +19,15 @@ def test_invalid_version(public_record, version):
         record.validate_record(public_record)
 
 
+@pytest.mark.parametrize(
+    "digest", [None, 1, [], "a" * 63, "A" * 64, "g" * 64, "a" * 64 + "\n"]
+)
+def test_invalid_commitment(public_record, digest):
+    public_record["commitment"] = digest
+    with pytest.raises(ValueError, match="invalid commitment"):
+        record.validate_record(public_record)
+
+
 @pytest.mark.parametrize("value", [None, [], {}, {"salt": "private"}])
 def test_invalid_fields(value):
     with pytest.raises(ValueError, match="invalid record fields"):

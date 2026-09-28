@@ -1,3 +1,6 @@
+import re
+
+
 def validate_record(record: dict) -> None:
     if not isinstance(record, dict) or record.keys() != {
         "version",
@@ -7,3 +10,6 @@ def validate_record(record: dict) -> None:
         raise ValueError("invalid record fields")
     if type(record["version"]) is not int or record["version"] != 1:
         raise ValueError("unsupported record version")
+    digest = record["commitment"]
+    if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+        raise ValueError("invalid commitment")
