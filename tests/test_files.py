@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from claim import files
@@ -51,3 +53,8 @@ def test_oversized_file(tmp_path, size):
 def test_negative_read_limit(tmp_path):
     with pytest.raises(ValueError, match="limit must be nonnegative"):
         files.read_limited(tmp_path / "missing", -1)
+
+
+def test_checkout_destination():
+    with pytest.raises(ValueError, match="outside the source checkout"):
+        files.require_external(Path(__file__).parent / "private")

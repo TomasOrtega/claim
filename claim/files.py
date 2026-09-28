@@ -2,6 +2,11 @@ import os
 from pathlib import Path
 
 
+def require_external(path: Path) -> None:
+    if path.resolve().is_relative_to(Path(__file__).resolve().parents[1]):
+        raise ValueError("private files must be outside the source checkout")
+
+
 def create_private_directory(path: Path) -> None:
     path.mkdir(mode=0o700)
 
