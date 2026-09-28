@@ -1,6 +1,6 @@
 import pytest
 
-from claim import encryption, storage
+from claim import encryption, files, storage
 
 
 @pytest.fixture
@@ -30,3 +30,11 @@ def test_oversized_opening_file(saved, key, monkeypatch):
     monkeypatch.setattr(storage, "MAX_OPENING_BYTES", saved.stat().st_size - 1)
     with pytest.raises(ValueError, match="file exceeds size limit"):
         storage.load_opening(saved, key)
+
+
+def test_source_edits(tmp_path, key):
+    source, frozen = tmp_path / "proof", tmp_path / "opening"
+    source.write_bytes(b"original\r\n\x00\xff")
+    storage.save_opening(frozen, files.read_limited(source, 100), bytes(32), key)
+    source.write_bytes(b"revised\n")
+    assert storage.load_opening(frozen, key) == (b"original\r\n\x00\xff", bytes(32))
