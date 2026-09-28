@@ -18,3 +18,9 @@ def test_save_opening(tmp_path, key):
 
 def test_load_opening(saved, key):
     assert storage.load_opening(saved, key) == (b"proof", bytes(32))
+
+
+def test_no_opening_overwrite(saved, key):
+    with pytest.raises(FileExistsError):
+        storage.save_opening(saved, b"replacement", bytes(32), key)
+    assert storage.load_opening(saved, key) == (b"proof", bytes(32))
