@@ -107,6 +107,22 @@ def test_public_export(accepted, tmp_path):
     assert not (output / "opening.fernet").exists()
 
 
+def test_export_allowlist(accepted, tmp_path, key):
+    directory = registry.location(*accepted)
+    (directory / "private-key").write_bytes(key)
+    entry = registry.export_claim(directory, tmp_path / "public")
+    assert set(entry) == {
+        "version",
+        "commitment",
+        "authors",
+        "id",
+        "status",
+        "timestamp",
+        "receipts",
+    }
+    assert not (tmp_path / "public" / "private-key").exists()
+
+
 def test_submission(sealed):
     data, token = registry.read_submission(sealed)
     assert data == (sealed / "record.json").read_bytes()
