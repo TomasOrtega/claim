@@ -23,3 +23,11 @@ def test_keygen(tmp_path):
     assert result.returncode == 0
     assert len(path.read_bytes()) == 44
     assert path.read_text() not in result.stdout + result.stderr
+
+
+def test_key_overwrite(tmp_path):
+    path = tmp_path / "key"
+    path.write_bytes(b"existing")
+    result = run("keygen", path)
+    assert result.returncode == 1 and "Traceback" not in result.stderr
+    assert path.read_bytes() == b"existing"
