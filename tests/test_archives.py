@@ -6,6 +6,15 @@ import pytest
 from claim.archives import unpack
 
 
+def test_archive_expanded_limit(tmp_path, monkeypatch):
+    monkeypatch.setattr("claim.archives.MAX_EXPANDED", 4)
+    stream = BytesIO()
+    with ZipFile(stream, "w") as archive:
+        archive.writestr("proof", b"12345")
+    with pytest.raises(ValueError, match="size limit"):
+        unpack(stream.getvalue(), tmp_path)
+
+
 @pytest.mark.parametrize(
     "name", ["../escape", "/escape", "a/../../escape", "a:b", "a//b", "a\\b"]
 )
