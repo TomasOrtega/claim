@@ -93,14 +93,12 @@ def test_submit_then_disclose_prs(automation, sealed, disclosed, published, tmp_
     state["uploads"][URL] = data
     assert issue_pr.process("submit", event(URL), REPO, "123").endswith("/pull/1")
     directory = registry.location(root, claim_id)
+    path = str(directory.relative_to(root))
     assert {p.name for p in directory.iterdir()} == {"record.json", "date.json"}
     saved = (directory / "date.json").read_bytes()
     date = json.loads(saved)
     assert date["recorded_at"] == DATE
-    assert (
-        git(root, "show", f"{date['commit']}:claims/{claim_id}/record.json").stdout
-        == data
-    )
+    assert git(root, "show", f"{date['commit']}:{path}/record.json").stdout == data
     assert state["bodies"][0].startswith("🤖 AI text below 🤖\n")
     assert "Closes #1" in state["bodies"][0]
     merge(root, f"submit/{claim_id}")
@@ -113,7 +111,7 @@ def test_submit_then_disclose_prs(automation, sealed, disclosed, published, tmp_
     assert (directory / "date.json").read_bytes() == saved
     assert set(
         git(root, "diff", "--name-only", "main...HEAD").stdout.decode().splitlines()
-    ) == {f"claims/{claim_id}/disclosure.json", f"claims/{claim_id}/events/0001.json"}
+    ) == {f"{path}/disclosure.json", f"{path}/events/0001.json"}
     proof_hash = git(root, "hash-object", disclosed / "proof").stdout.decode().strip()
     assert proof_hash not in git(root, "rev-list", "--objects", "--all").stdout.decode()
     merge(root, f"disclose/{claim_id}")
@@ -272,3 +270,29 @@ def test_account_check_uses_issue_author(automation, sealed):
     payload = event(URL, author="alice")
     payload["sender"] = {"login": "Maintainer"}
     assert issue_pr.process("submit", payload, REPO, "123").endswith("/pull/1")
+
+
+def test_independent_submissions_from_same_snapshot(
+    automation, sealed, tmp_path, monkeypatch
+):
+    root, state = automation
+    other = tmp_path / "other"
+    git(root, "clone", "--no-local", root, other)
+    git(other, "remote", "set-url", "origin", tmp_path / "remote.git")
+    first = (sealed / "record.json").read_bytes()
+    second = record.dump_record(record.load_record(first) | {"authors": ["Bob"]})
+    second_url = URL.replace("/123/", "/124/")
+    state["uploads"].update({URL: first, second_url: second})
+    issue_pr.process("submit", event(URL), REPO, "123")
+    monkeypatch.chdir(other)
+    issue_pr.process("submit", event(second_url, 2, author="Bob"), REPO, "124")
+    first_id, second_id = record.record_id(first), record.record_id(second)
+    merge(root, f"submit/{first_id}")
+    branch = f"submit/{second_id}"
+    git(root, "fetch", "origin", f"refs/heads/{branch}:refs/heads/{branch}")
+    merge(root, branch)
+    for claim_id, data, when in ((first_id, first, DATE), (second_id, second, LATER)):
+        directory = registry.location(root, claim_id)
+        assert registry.read_claim(directory) == data
+        assert dates.read(directory, data)["recorded_at"] == when
+    assert len(state["prs"]) == 2

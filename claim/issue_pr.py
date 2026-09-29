@@ -44,7 +44,7 @@ def prepare(
     request: dict | None = None,
 ) -> None:
     root = Path.cwd()
-    path = f"claims/{claim_id}"
+    path = str(registry.location(root, claim_id).relative_to(root))
     if kind == "submit":
         registry.accept(root, source / "record.json")
         snapshot = commit(f"feat: register claim {claim_id}", ".gitattributes", path)

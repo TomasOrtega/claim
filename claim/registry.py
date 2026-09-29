@@ -9,7 +9,7 @@ from claim import dates, disclosure, events, files, record, site
 def location(root: Path, claim_id: str) -> Path:
     if re.fullmatch(r"[0-9a-f]{64}", claim_id) is None:
         raise ValueError("invalid claim ID")
-    return root / "claims" / claim_id
+    return root / "claims" / claim_id[:2] / claim_id[2:4] / claim_id
 
 
 def preserve_git_bytes(root: Path) -> None:
@@ -58,6 +58,7 @@ def export_claim(directory: Path, output: Path) -> dict:
         "date": date,
         "disclosure": opening,
     }
+    output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     files.create_private_directory(output)
     files.write_private(output / "record.json", data)
     if date is not None:
@@ -90,8 +91,8 @@ def export(root: Path, output: Path) -> None:
     files.create_private_directory(output)
     preserve_git_bytes(output)
     entries = [
-        export_claim(path, output / path.name)
-        for path in sorted((root / "claims").iterdir())
+        export_claim(path, location(output, path.name))
+        for path in sorted((root / "claims").glob("*/*/*"))
     ]
     counts = Counter(entry["authors"][0].lower() for entry in entries)
     index = {"claims": entries, "authors": dict(sorted(counts.items()))}
@@ -109,7 +110,7 @@ def accept(root: Path, source: Path) -> str:
     directory = location(root, claim_id)
     root.mkdir(mode=0o700, exist_ok=True)
     preserve_git_bytes(root)
-    directory.parent.mkdir(mode=0o700, exist_ok=True)
+    directory.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     files.create_private_directory(directory)
     files.write_private(directory / "record.json", data)
     return claim_id

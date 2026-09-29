@@ -1,4 +1,4 @@
-from claim import cli
+from claim import cli, registry
 
 
 def test_bundle_command(accepted, published, tmp_path):
@@ -14,8 +14,8 @@ def test_bundle_command(accepted, published, tmp_path):
 def test_disclosure_command(accepted, published):
     root, claim_id = accepted
     assert cli.main(["accept-disclosure", str(root), claim_id, *published]) == 0
-    assert (root / "claims" / claim_id / "disclosure.json").exists()
-    assert not (root / "claims" / claim_id / "proof").exists()
+    assert (registry.location(root, claim_id) / "disclosure.json").exists()
+    assert not (registry.location(root, claim_id) / "proof").exists()
 
 
 def test_export_command(accepted, tmp_path):
@@ -29,6 +29,6 @@ def test_accept_command(sealed, tmp_path, capsys):
     root = tmp_path / "registry"
     assert cli.main(["accept", str(root), str(sealed / "record.json")]) == 0
     claim_id = capsys.readouterr().out.strip()
-    assert (root / "claims" / claim_id / "record.json").read_bytes() == (
+    assert (registry.location(root, claim_id) / "record.json").read_bytes() == (
         sealed / "record.json"
     ).read_bytes()

@@ -20,6 +20,22 @@ def test_accept(sealed, tmp_path):
     assert {path.name for path in entry.iterdir()} == {"record.json"}
 
 
+def test_claims_use_hash_prefix_directories(accepted):
+    root, claim_id = accepted
+    path = root / "claims" / claim_id[:2] / claim_id[2:4] / claim_id
+    assert registry.location(root, claim_id) == path
+    assert (path / "record.json").is_file()
+
+
+def test_public_export_uses_hash_prefixes(accepted, tmp_path):
+    root, claim_id = accepted
+    output = tmp_path / "site"
+    registry.export(root, output)
+    relative = f"claims/{claim_id[:2]}/{claim_id[2:4]}/{claim_id}/record.json"
+    assert (output / relative).is_file()
+    assert f"./{relative}" in (output / "index.html").read_text()
+
+
 def test_duplicate_intake(accepted, sealed):
     root, claim_id = accepted
     before = registry.read_claim(registry.location(root, claim_id))
