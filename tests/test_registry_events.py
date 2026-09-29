@@ -49,7 +49,7 @@ def test_withdrawn_disclosure(accepted, published, tmp_path):
     registry.disclose(*accepted, *published)
     registry.export(accepted[0], tmp_path / "site")
     index = json.loads((tmp_path / "site" / "index.json").read_bytes())
-    assert index["authors"] == {"Alice": 1}
+    assert index["authors"] == {"alice": 1}
     assert index["claims"][0]["status"] == "withdrawn"
     assert index["claims"][0]["events"] == ["withdrawn", "disclosed"]
 

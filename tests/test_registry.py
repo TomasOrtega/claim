@@ -67,7 +67,7 @@ def test_export_registry(accepted, tmp_path):
     registry.export(root, tmp_path / "site")
     index = json.loads((tmp_path / "site" / "index.json").read_bytes())
     assert [entry["id"] for entry in index["claims"]] == [claim_id]
-    assert index["authors"] == {"Alice": 1}
+    assert index["authors"] == {"alice": 1}
     assert "Alice" in (tmp_path / "site" / "index.html").read_text()
     assert (tmp_path / "site" / ".nojekyll").exists()
 
@@ -91,3 +91,14 @@ def test_export_date(accepted, tmp_path):
     entry = registry.export_claim(directory, output)
     assert entry["date"]["recorded_at"] == DATE
     assert (output / "date.json").read_bytes() == (directory / "date.json").read_bytes()
+
+
+def test_count_usernames_ignores_case(accepted, tmp_path):
+    root, _ = accepted
+    original = record.load_record(registry.read_claim(registry.location(*accepted)))
+    source = tmp_path / "record.json"
+    source.write_bytes(record.dump_record(original | {"authors": ["alice"]}))
+    registry.accept(root, source)
+    registry.export(root, tmp_path / "site")
+    index = json.loads((tmp_path / "site" / "index.json").read_bytes())
+    assert index["authors"] == {"alice": 2}

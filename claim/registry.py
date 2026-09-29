@@ -93,7 +93,7 @@ def export(root: Path, output: Path) -> None:
         export_claim(path, output / path.name)
         for path in sorted((root / "claims").iterdir())
     ]
-    counts = Counter(name for entry in entries for name in entry["authors"])
+    counts = Counter(entry["authors"][0].lower() for entry in entries)
     index = {"claims": entries, "authors": dict(sorted(counts.items()))}
     files.write_private(output / "index.html", site.render(index).encode("utf-8"))
     files.write_private(output / ".nojekyll", b"")
