@@ -39,6 +39,14 @@ def disclose(directory: Path, output: Path, key: bytes) -> None:
         files.write_private(output / name, content)
 
 
+def read_disclosure(directory: Path) -> dict[str, bytes]:
+    limits = {"record.json": MAX_RECORD_BYTES, "proof": MAX_ARTIFACT_BYTES, "salt": 32}
+    return {
+        name: files.read_limited(directory / name, limit)
+        for name, limit in limits.items()
+    }
+
+
 def verify(directory: Path) -> str:
     return check_opening(
         files.read_limited(directory / "record.json", MAX_RECORD_BYTES),

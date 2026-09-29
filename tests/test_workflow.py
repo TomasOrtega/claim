@@ -65,6 +65,14 @@ def test_mismatched_export(sealed, tmp_path, key):
     assert not (tmp_path / "disclosed").exists()
 
 
+def test_disclosure_snapshot(sealed, tmp_path, key):
+    output = tmp_path / "disclosed"
+    workflow.disclose(sealed, output, key)
+    snapshot = workflow.read_disclosure(output)
+    (output / "proof").write_bytes(b"changed")
+    assert snapshot["proof"] == b"proof\r\n\xff"
+
+
 def test_record_mismatch(sealed):
     with pytest.raises(ValueError, match="opening does not match record"):
         workflow.check_opening(
