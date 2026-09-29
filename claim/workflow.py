@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from claim import commitment, files, record, storage
+from claim import commitment, dates, files, record, storage
 from claim.limits import MAX_ARTIFACT_BYTES, MAX_RECORD_BYTES
 
 
@@ -49,4 +49,5 @@ def read_disclosure(directory: Path) -> dict[str, bytes]:
 
 def verify(directory: Path) -> str:
     data = read_disclosure(directory)
+    dates.read(directory, data["record.json"])
     return check_opening(data["record.json"], data["proof"], data["salt"])

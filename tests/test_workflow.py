@@ -1,6 +1,7 @@
 import pytest
+from test_dates import COMMIT, DATE, RUN
 
-from claim import commitment, record, storage, workflow
+from claim import commitment, dates, record, storage, workflow
 
 
 def test_freeze(tmp_path, key):
@@ -46,6 +47,23 @@ def test_verify(sealed, tmp_path, key):
     workflow.disclose(sealed, output, key)
     public = record.load_record((sealed / "record.json").read_bytes())
     assert workflow.verify(output) == public["commitment"]
+
+
+def test_verify_dated_disclosure(sealed, tmp_path, key):
+    output = tmp_path / "disclosed"
+    workflow.disclose(sealed, output, key)
+    data = record.read_record(output / "record.json")
+    dates.save(output, data, DATE, COMMIT, RUN)
+    assert workflow.verify(output) == record.load_record(data)["commitment"]
+
+
+def test_verify_date_for_another_record(sealed, tmp_path, key):
+    output = tmp_path / "disclosed"
+    workflow.disclose(sealed, output, key)
+    data = record.read_record(output / "record.json")
+    dates.save(output, b" " + data, DATE, COMMIT, RUN)
+    with pytest.raises(ValueError, match="date does not match record"):
+        workflow.verify(output)
 
 
 @pytest.mark.parametrize("name", ["proof", "salt", "record.json"])
