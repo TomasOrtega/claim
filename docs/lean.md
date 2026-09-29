@@ -27,7 +27,7 @@ First [verify the opening and timestamp](verification.md). Then check the
 disclosed archive on a separate verifier machine, using an image you built:
 
 ```sh
-docker build -f docker/lean.Dockerfile -t claim-lean .
+docker build -f docker/lean.Dockerfile -t claim-lean docker
 LEAN_IMAGE=$(docker image inspect --format '{{.Id}}' claim-lean)
 uv run python -m claim check-lean ~/bundle/proof Proof result --image "$LEAN_IMAGE"
 ```
@@ -45,5 +45,6 @@ statement and sources to confirm they express the intended mathematics. Neither
 a Lean check nor a saved report authenticates the author.
 
 Local integration tests: `CLAIM_TEST_LEAN=1 uv run pytest tests/test_lean_integration.py`.
+Container integration: `CLAIM_TEST_LEAN_IMAGE="$LEAN_IMAGE" uv run pytest tests/test_lean_container_integration.py`.
 The container path is implemented but has not been run here: Docker's engine
 was unavailable.
