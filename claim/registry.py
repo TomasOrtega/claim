@@ -106,6 +106,15 @@ def export_claim(directory: Path, output: Path) -> dict:
     data = read_claim(directory)
     proofs = read_receipts(directory, data)
     history = events.read(directory)
+    disclosure = (
+        workflow.read_disclosure(directory / "disclosure")
+        if "disclosed" in history
+        else {}
+    )
+    if disclosure:
+        if disclosure["record.json"] != data:
+            raise ValueError("disclosure record does not match registered record")
+        workflow.check_opening(data, disclosure["proof"], disclosure["salt"])
     entry = record.load_record(data) | {
         "id": directory.name,
         "status": events.status(history),
@@ -119,6 +128,8 @@ def export_claim(directory: Path, output: Path) -> dict:
         files.write_private(output / name, proof)
     for event in history:
         events.append(output, event)
+    for name in ("proof", "salt") if disclosure else ():
+        files.write_private(output / name, disclosure[name])
     return entry
 
 

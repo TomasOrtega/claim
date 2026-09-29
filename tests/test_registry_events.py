@@ -27,6 +27,14 @@ def test_export_withdrawal(accepted, tmp_path):
     assert events.read(output) == ["withdrawn"]
 
 
+def test_export_disclosure(accepted, disclosed, tmp_path):
+    registry.disclose(*accepted, disclosed)
+    output = tmp_path / "public"
+    entry = registry.export_claim(registry.location(*accepted), output)
+    assert workflow.verify(output) == workflow.verify(disclosed)
+    assert entry["events"] == ["disclosed"]
+
+
 def test_disclose_claim(accepted, disclosed):
     root, claim_id = accepted
     original = registry.read_claim(registry.location(root, claim_id))
