@@ -52,12 +52,12 @@ def test_date_command(pushed, capsys):
     assert capsys.readouterr().out.strip() == "1"
 
 
-def test_disclosure_preserves_claim_date(pushed, disclosed):
+def test_disclosure_preserves_claim_date(pushed, published):
     root, claim_id, commit = pushed
     dates.record_push(root, commit, DATE, RUN)
     path = registry.location(root, claim_id) / "date.json"
     original = path.read_bytes()
-    registry.disclose(root, claim_id, disclosed)
+    registry.disclose(root, claim_id, *published)
     git(root, "add", ".")
     git(root, "commit", "-m", "disclose claim")
     commit = git(root, "rev-parse", "HEAD").stdout.decode().strip()

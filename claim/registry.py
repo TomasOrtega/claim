@@ -3,7 +3,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from claim import dates, events, files, record, site, workflow
+from claim import dates, disclosure, events, files, record, site
 
 
 def location(root: Path, claim_id: str) -> Path:
@@ -27,20 +27,16 @@ def read_claim(directory: Path) -> bytes:
     return data
 
 
-def disclose(root: Path, claim_id: str, source: Path) -> None:
+def disclose(root: Path, claim_id: str, proof_url: str, salt: str) -> None:
     directory = location(root, claim_id)
     original = read_claim(directory)
-    snapshot = workflow.read_disclosure(source)
-    if snapshot["record.json"] != original:
-        raise ValueError("disclosure record does not match registered record")
-    workflow.check_opening(original, snapshot["proof"], snapshot["salt"])
     history = events.read(directory)
     if "disclosed" in history:
         raise ValueError("claim already disclosed")
-    output = directory / "disclosure"
-    files.create_private_directory(output)
-    for name, data in snapshot.items():
-        files.write_private(output / name, data)
+    value = disclosure.check(original, proof_url, salt)
+    files.write_private(
+        directory / "disclosure.json", json.dumps(value).encode() + b"\n"
+    )
     events.append(directory, "disclosed")
 
 
@@ -54,20 +50,13 @@ def export_claim(directory: Path, output: Path) -> dict:
     data = read_claim(directory)
     date = dates.read(directory, data)
     history = events.read(directory)
-    disclosure = (
-        workflow.read_disclosure(directory / "disclosure")
-        if "disclosed" in history
-        else {}
-    )
-    if disclosure:
-        if disclosure["record.json"] != data:
-            raise ValueError("disclosure record does not match registered record")
-        workflow.check_opening(data, disclosure["proof"], disclosure["salt"])
+    opening = disclosure.read(directory, data) if "disclosed" in history else None
     entry = record.load_record(data) | {
         "id": directory.name,
         "status": events.status(history),
         "events": history,
         "date": date,
+        "disclosure": opening,
     }
     files.create_private_directory(output)
     files.write_private(output / "record.json", data)
@@ -75,8 +64,10 @@ def export_claim(directory: Path, output: Path) -> dict:
         files.write_private(output / "date.json", json.dumps(date).encode() + b"\n")
     for event in history:
         events.append(output, event)
-    for name in ("proof", "salt") if disclosure else ():
-        files.write_private(output / name, disclosure[name])
+    if opening is not None:
+        files.write_private(
+            output / "disclosure.json", json.dumps(opening).encode() + b"\n"
+        )
     return entry
 
 
@@ -84,7 +75,12 @@ def bundle(root: Path, claim_id: str, output: Path) -> None:
     directory = location(root, claim_id)
     if "disclosed" not in events.read(directory):
         raise ValueError("claim has not been disclosed")
+    data = read_claim(directory)
+    opening = disclosure.read(directory, data)
+    proof = disclosure.download(opening, data)
     export_claim(directory, output)
+    files.write_private(output / "proof", proof)
+    files.write_private(output / "salt", bytes.fromhex(opening["salt"]))
     preserve_git_bytes(output)
 
 
