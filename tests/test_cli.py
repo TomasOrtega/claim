@@ -107,3 +107,21 @@ def test_key_overwrite(tmp_path):
     result = run("keygen", path)
     assert result.returncode == 1 and "Traceback" not in result.stderr
     assert path.read_bytes() == b"existing"
+
+
+def test_seal_rejects_coauthors(tmp_path, key_file):
+    source = tmp_path / "proof"
+    source.write_bytes(b"A proof by Alice and Bob")
+    result = run(
+        "seal",
+        source,
+        tmp_path / "sealed",
+        "--key",
+        key_file,
+        "--author",
+        "Alice",
+        "--author",
+        "Bob",
+    )
+    assert result.returncode == 1
+    assert "exactly one" in result.stderr

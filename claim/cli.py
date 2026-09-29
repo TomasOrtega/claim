@@ -17,7 +17,12 @@ def main(argv=None) -> int:
     seal.add_argument("source", type=Path)
     seal.add_argument("directory", type=Path)
     seal.add_argument("--key", type=Path, required=True)
-    seal.add_argument("--author", action="append", required=True)
+    seal.add_argument(
+        "--author",
+        action="append",
+        required=True,
+        help="your GitHub username; specify exactly once",
+    )
     disclose = commands.add_parser("disclose", help="export a proof and salt")
     disclose.add_argument("directory", type=Path)
     disclose.add_argument("output", type=Path)
