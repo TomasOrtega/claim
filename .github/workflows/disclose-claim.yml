@@ -37,6 +37,6 @@ jobs:
           cat > "$RUNNER_TEMP/claim-error.md" <<EOF
           🤖 AI text below 🤖
 
-          Could not process this disclosure. [View details]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). Correct the files and open a new issue, or ask a maintainer to rerun a failed job.
+          Could not process this disclosure. [View details]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). Check the claim ID, public proof link and salt, then open a new issue or ask a maintainer to rerun a failed job.
           EOF
           gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/claim-error.md"

@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from claim import dates, files, registry, submissions, workflow
+from claim import dates, disclosure, files, registry, submissions
 
 
 def command(*args: str) -> str:
@@ -36,7 +36,12 @@ def commit(message: str, *paths: str) -> str:
 
 
 def prepare(
-    kind: str, source: Path, claim_id: str, recorded_at: str, run_url: str
+    kind: str,
+    source: Path,
+    claim_id: str,
+    recorded_at: str,
+    run_url: str,
+    request: dict | None = None,
 ) -> None:
     root = Path.cwd()
     path = f"claims/{claim_id}"
@@ -52,20 +57,24 @@ def prepare(
         )
         commit(f"chore: record submission date {claim_id}", f"{path}/date.json")
     else:
-        registry.disclose(root, claim_id, source)
+        registry.disclose(root, claim_id, request["proof_url"], request["salt"])
         commit(f"feat: disclose claim {claim_id}", path)
 
 
-def check_existing(kind: str, claim_id: str, source: Path) -> None:
+def check_existing(
+    kind: str, claim_id: str, source: Path, request: dict | None = None
+) -> None:
     directory = registry.location(Path.cwd(), claim_id)
     data = registry.read_claim(directory)
-    if data != (source / "record.json").read_bytes():
-        raise ValueError("existing branch has a different claim")
     if kind == "submit":
+        if data != (source / "record.json").read_bytes():
+            raise ValueError("existing branch has a different claim")
         if dates.read(directory, data) is None:
             raise ValueError("existing submission branch has no date")
     else:
-        workflow.verify(directory / "disclosure")
+        value = disclosure.read(directory, data)
+        if any(value[key] != request[key] for key in ("proof_url", "salt")):
+            raise ValueError("existing branch has a different disclosure")
 
 
 def process(kind: str, event: dict, repo: str, run_id: str) -> str:
@@ -76,7 +85,11 @@ def process(kind: str, event: dict, repo: str, run_id: str) -> str:
     run_url = f"https://github.com/{repo}/actions/runs/{run_id}"
     with TemporaryDirectory() as temporary:
         source = Path(temporary)
-        claim_id = submissions.download(kind, issue.get("body") or "", source)
+        body = issue.get("body") or ""
+        request = submissions.disclosure_request(body) if kind == "disclose" else None
+        claim_id = (
+            request["claim_id"] if request else submissions.download(body, source)
+        )
         branch = f"{kind}/{claim_id}"
         existing = gh(
             "pr",
@@ -96,13 +109,13 @@ def process(kind: str, event: dict, repo: str, run_id: str) -> str:
         if git("ls-remote", "--heads", "origin", f"refs/heads/{branch}"):
             git("fetch", "origin", f"refs/heads/{branch}")
             git("switch", "--detach", "FETCH_HEAD")
-            check_existing(kind, claim_id, source)
+            check_existing(kind, claim_id, source, request)
         else:
             recorded_at = gh(
                 "api", f"repos/{repo}/actions/runs/{run_id}", "--jq", ".created_at"
             )
             git("switch", "-c", branch)
-            prepare(kind, source, claim_id, recorded_at, run_url)
+            prepare(kind, source, claim_id, recorded_at, run_url, request)
             git("push", "origin", f"HEAD:refs/heads/{branch}")
         verb = "Register" if kind == "submit" else "Disclose"
         body = source / "pr-body.md"

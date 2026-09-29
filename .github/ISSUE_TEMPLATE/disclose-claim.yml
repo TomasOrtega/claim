@@ -1,17 +1,32 @@
 name: Disclose a claim
-description: Publish a proof and salt for a registered claim.
+description: Link a published proof to a registered claim.
 title: "[Disclosure] "
 body:
   - type: markdown
     attributes:
       value: |
-        Attach a ZIP containing only `record.json`, `proof` and `salt` at its root.
-        The record identifies your claim. Never include your encryption key.
-        **Uploading this ZIP makes the proof and salt public immediately, before review.**
-  - type: textarea
-    id: disclosure
+        Publish the original proof in your own public GitHub repository.
+        Open the file on GitHub and press `y` to copy a link to its exact commit.
+        `claim disclose` prints the claim ID and salt. Never share the encryption key.
+  - type: input
+    id: claim-id
     attributes:
-      label: Disclosure ZIP
-      description: Drag your disclosure.zip file here. Attach one file.
+      label: Claim ID
+      description: The 64-character ID of your registered claim.
+    validations:
+      required: true
+  - type: input
+    id: proof-url
+    attributes:
+      label: Proof URL
+      description: Paste the file permalink, with a full commit hash instead of a branch name.
+      placeholder: https://github.com/your-name/proofs/blob/COMMIT/proof.pdf
+    validations:
+      required: true
+  - type: input
+    id: salt
+    attributes:
+      label: Salt
+      description: Paste the 64 lowercase hexadecimal characters printed by claim disclose.
     validations:
       required: true

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from test_dates import DATE
 from test_git_registry import git
-from test_submissions import URL, zip_files
+from test_submissions import URL, disclosure_body
 
 from claim import dates, issue_pr, record, registry, submissions, workflow
 
@@ -70,13 +70,19 @@ def event(url, number=1):
     }
 
 
+def disclosure_event(claim_id, published, number=2):
+    payload = event("", number)
+    payload["issue"]["body"] = disclosure_body(claim_id, *published)
+    return payload
+
+
 def merge(root, branch):
     git(root, "switch", "main")
     git(root, "merge", "--no-ff", branch, "-m", "merge claim PR")
     git(root, "push", "origin", "main")
 
 
-def test_submit_then_disclose_prs(automation, sealed, disclosed, tmp_path):
+def test_submit_then_disclose_prs(automation, sealed, disclosed, published, tmp_path):
     root, state = automation
     data = (sealed / "record.json").read_bytes()
     claim_id = record.record_id(data)
@@ -98,18 +104,14 @@ def test_submit_then_disclose_prs(automation, sealed, disclosed, tmp_path):
     assert dates.record_push(root, head, LATER, date["run_url"]) == 0
     assert (directory / "date.json").read_bytes() == saved
 
-    url = URL.replace("record.json", "disclosure.zip")
-    state["uploads"][url] = zip_files(
-        {p.name: p.read_bytes() for p in disclosed.iterdir()}
-    )
-    assert issue_pr.process("disclose", event(url, 2), REPO, "124").endswith("/pull/2")
+    payload = disclosure_event(claim_id, published)
+    assert issue_pr.process("disclose", payload, REPO, "124").endswith("/pull/2")
     assert (directory / "date.json").read_bytes() == saved
     assert set(
         git(root, "diff", "--name-only", "main...HEAD").stdout.decode().splitlines()
-    ) == {
-        f"claims/{claim_id}/disclosure/{name}"
-        for name in ("record.json", "proof", "salt")
-    } | {f"claims/{claim_id}/events/0001.json"}
+    ) == {f"claims/{claim_id}/disclosure.json", f"claims/{claim_id}/events/0001.json"}
+    proof_hash = git(root, "hash-object", disclosed / "proof").stdout.decode().strip()
+    assert proof_hash not in git(root, "rev-list", "--objects", "--all").stdout.decode()
     merge(root, f"disclose/{claim_id}")
     registry.bundle(root, claim_id, tmp_path / "bundle")
     assert (
@@ -178,16 +180,16 @@ def test_edited_issue_is_not_processed(automation):
     assert not state["prs"]
 
 
-def test_invalid_disclosure_does_not_push(automation, disclosed):
+def test_invalid_disclosure_does_not_push(automation, sealed, disclosed, published):
     root, state = automation
-    url = URL.replace("record.json", "disclosure.zip")
-    contents = {p.name: p.read_bytes() for p in disclosed.iterdir()} | {
-        "proof": b"wrong"
-    }
-    state["uploads"][url] = zip_files(contents)
+    claim_id = registry.accept(root, sealed / "record.json")
+    git(root, "add", ".")
+    git(root, "commit", "-m", "register claim")
+    git(root, "push", "origin", "main")
+    (disclosed / "proof").write_bytes(b"wrong")
     before = git(root, "ls-remote", "origin").stdout
     with pytest.raises(ValueError, match="opening does not match"):
-        issue_pr.process("disclose", event(url), REPO, "123")
+        issue_pr.process("disclose", disclosure_event(claim_id, published), REPO, "123")
     assert git(root, "ls-remote", "origin").stdout == before
     assert not state["prs"]
 
@@ -208,3 +210,23 @@ def test_workflow_entrypoint(automation, sealed, tmp_path, monkeypatch, capsys):
     issue_pr.main()
     assert capsys.readouterr().out.strip() == f"https://github.com/{REPO}/pull/1"
     assert f"https://github.com/{REPO}/pull/1" in summary.read_text()
+
+
+def test_disclosure_retry_keeps_verification(automation, sealed, published):
+    root, state = automation
+    claim_id = registry.accept(root, sealed / "record.json")
+    git(root, "add", ".")
+    git(root, "commit", "-m", "register claim")
+    git(root, "push", "origin", "main")
+    payload = disclosure_event(claim_id, published)
+    state["fail"] = True
+    with pytest.raises(subprocess.CalledProcessError):
+        issue_pr.process("disclose", payload, REPO, "123")
+    path = registry.location(root, claim_id) / "disclosure.json"
+    original = path.read_bytes()
+    git(root, "switch", "main")
+    url = issue_pr.process("disclose", payload, REPO, "124")
+    assert path.read_bytes() == original
+    git(root, "switch", "main")
+    assert issue_pr.process("disclose", payload, REPO, "124") == url
+    assert len(state["prs"]) == 1
