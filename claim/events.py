@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from claim.files import read_limited
+from claim.files import read_limited, write_private
 
 _EVENTS = {
     "disclosed": b'{"event":"disclosed"}\n',
@@ -22,3 +22,12 @@ def read(directory: Path) -> list[str]:
             raise ValueError("duplicate claim event")
         history.append(event)
     return history
+
+
+def append(directory: Path, event: str) -> None:
+    history = read(directory)
+    if event not in _EVENTS or event in history:
+        raise ValueError("invalid or duplicate claim event")
+    path = directory / "events"
+    path.mkdir(mode=0o700, exist_ok=True)
+    write_private(path / f"{len(history) + 1:04d}.json", _EVENTS[event])
