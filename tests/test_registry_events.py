@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from claim import events, registry, workflow
@@ -33,6 +35,16 @@ def test_export_disclosure(accepted, disclosed, tmp_path):
     entry = registry.export_claim(registry.location(*accepted), output)
     assert workflow.verify(output) == workflow.verify(disclosed)
     assert entry["events"] == ["disclosed"]
+
+
+def test_withdrawn_disclosure(accepted, disclosed, tmp_path):
+    registry.withdraw(*accepted)
+    registry.disclose(*accepted, disclosed)
+    registry.export(accepted[0], tmp_path / "site")
+    index = json.loads((tmp_path / "site" / "index.json").read_bytes())
+    assert index["authors"] == {"Alice": 1}
+    assert index["claims"][0]["status"] == "withdrawn"
+    assert index["claims"][0]["events"] == ["withdrawn", "disclosed"]
 
 
 def test_disclose_claim(accepted, disclosed):
