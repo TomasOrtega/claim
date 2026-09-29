@@ -1,13 +1,15 @@
 # claim
 Claim registry for mathematics.
 
-Register mathematical work with a date while keeping the work private.
-
 The aim is to give researchers time to check their work and write a clear
-explanation before publishing, including when they use AI. When you later share
-the original work, others can check that it matches your earlier record.
+explanation before publishing, including when they use AI.
 
-Your GitHub username and the submission date are public.
+1. Register a claim to a theorem or proof while keeping the work private.
+2. Record a public claim date through GitHub.
+3. Make the submitting GitHub account public, to discourage mass speculative claims.
+4. Publish your work later and let others check that it matches your earlier claim,
+   even if someone else has published first.
+
 Each claim has one account responsible for it;
 put all authors' names in the work itself before creating the claim.
 
