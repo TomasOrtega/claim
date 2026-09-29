@@ -1,9 +1,7 @@
-# Registry
+# Registry commands
 
-Use a dedicated checkout of a private GitHub repository. An operator reviews each
-submission and runs intake; there is no automatic approval or identity check.
-Public name counts provide accountability, not reliable per-person quotas.
-Install the [claim date workflow](dates.md#registry-setup) once before intake.
+Run these commands from this checkout, using `~/claim-private` for the existing
+registry checkout.
 
 The submission directory must contain only `record.json` and `opening.fernet`.
 Never send the researcher key.
@@ -33,13 +31,8 @@ uv run python -m claim export-index ~/claim-private ~/public-export
 Exports use a fresh directory outside the registry. They contain author records,
 dates, counts, JSON and HTML. Proofs and salts appear only after disclosure.
 
-Copy the export, including `.gitattributes` and `.nojekyll`, into a separate public
-repository. Publish its root using [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-Publish only after export succeeds; interrupted commands can leave partial output.
-
-Keep a separate clone of the private repository as a backup. Test a restore by
-running `disclose` on `claims/ID/` with the researcher's backup key, then `verify`
-on the disclosure. The key must be backed up separately from the repository.
+Publish the export, including `.gitattributes` and `.nojekyll`, to the public site
+after the command succeeds.
 
 ## Disclosure and withdrawal
 
