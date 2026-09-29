@@ -3,20 +3,21 @@ from html import escape
 
 def claim_row(entry: dict) -> str:
     claim_id = escape(entry["id"])
+    path = f"./claims/{claim_id[:2]}/{claim_id[2:4]}/{claim_id}"
     author = escape(entry["authors"][0])
     date = "Awaiting CI"
     evidence = ""
     if entry["date"] is not None:
         date = escape(entry["date"]["recorded_at"])
-        evidence = f'<a href="./{claim_id}/date.json">date</a> <a href="{escape(entry["date"]["run_url"])}">CI run</a>'
+        evidence = f'<a href="{path}/date.json">date</a> <a href="{escape(entry["date"]["run_url"])}">CI run</a>'
     if "disclosed" in entry.get("events", []):
         proof_url = escape(entry["disclosure"]["proof_url"])
-        evidence += f' <a href="{proof_url}">proof</a> <a href="./{claim_id}/disclosure.json">disclosure</a>'
+        evidence += f' <a href="{proof_url}">proof</a> <a href="{path}/disclosure.json">disclosure</a>'
     evidence += " ".join(
-        f' <a href="./{claim_id}/events/{i:04d}.json">{escape(event)}</a>'
+        f' <a href="{path}/events/{i:04d}.json">{escape(event)}</a>'
         for i, event in enumerate(entry.get("events", []), 1)
     )
-    return f'<tr><td><a href="./{claim_id}/record.json">{claim_id[:12]}</a></td><td>{author}</td><td>{escape(entry["status"])}</td><td>{date}</td><td>{evidence}</td></tr>'
+    return f'<tr><td><a href="{path}/record.json">{claim_id[:12]}</a></td><td>{author}</td><td>{escape(entry["status"])}</td><td>{date}</td><td>{evidence}</td></tr>'
 
 
 def render(index: dict) -> str:
