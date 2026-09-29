@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from claim import dates, disclosure, files, registry, submissions
+from claim import dates, disclosure, files, record, registry, submissions
 
 
 def command(*args: str) -> str:
@@ -90,6 +90,10 @@ def process(kind: str, event: dict, repo: str, run_id: str) -> str:
         claim_id = (
             request["claim_id"] if request else submissions.download(body, source)
         )
+        directory = registry.location(Path.cwd(), claim_id) if request else source
+        public = record.load_record(record.read_record(directory / "record.json"))
+        if public["authors"][0].lower() != issue["user"]["login"].lower():
+            raise ValueError("record author must match the submitting GitHub account")
         branch = f"{kind}/{claim_id}"
         existing = gh(
             "pr",

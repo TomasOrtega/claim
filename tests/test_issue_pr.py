@@ -62,11 +62,15 @@ def automation(tmp_path, monkeypatch):
     return root, state
 
 
-def event(url, number=1):
+def event(url, number=1, author="Alice"):
     return {
         "action": "opened",
         "repository": {"full_name": REPO, "default_branch": "main"},
-        "issue": {"number": number, "body": f"### Attachment\n\n[file]({url})"},
+        "issue": {
+            "number": number,
+            "body": f"### Attachment\n\n[file]({url})",
+            "user": {"login": author},
+        },
     }
 
 
@@ -166,7 +170,7 @@ def test_new_record_gets_new_date(automation, sealed):
     changed = record.dump_record(record.load_record(data) | {"authors": ["Bob"]})
     new_url = URL.replace("/123/", "/124/")
     state["uploads"][new_url] = changed
-    issue_pr.process("submit", event(new_url, 2), REPO, "124")
+    issue_pr.process("submit", event(new_url, 2, author="Bob"), REPO, "124")
     date = dates.read(registry.location(root, record.record_id(changed)), changed)
     assert date["recorded_at"] == LATER
     assert len(state["prs"]) == 2
@@ -230,3 +234,41 @@ def test_disclosure_retry_keeps_verification(automation, sealed, published):
     git(root, "switch", "main")
     assert issue_pr.process("disclose", payload, REPO, "124") == url
     assert len(state["prs"]) == 1
+
+
+@pytest.mark.parametrize("existing", [False, True])
+def test_submitter_must_match_record(automation, sealed, existing):
+    root, state = automation
+    data = (sealed / "record.json").read_bytes()
+    state["uploads"][URL] = data
+    if existing:
+        state["prs"][f"submit/{record.record_id(data)}"] = (
+            "https://github.com/example/registry/pull/1"
+        )
+    before = git(root, "ls-remote", "origin").stdout
+    with pytest.raises(ValueError, match="GitHub account"):
+        issue_pr.process("submit", event(URL, author="Bob"), REPO, "123")
+    assert git(root, "ls-remote", "origin").stdout == before
+    assert not state["bodies"]
+
+
+def test_only_registered_account_can_disclose(automation, sealed, published):
+    root, state = automation
+    claim_id = registry.accept(root, sealed / "record.json")
+    git(root, "add", ".")
+    git(root, "commit", "-m", "register claim")
+    git(root, "push", "origin", "main")
+    payload = disclosure_event(claim_id, published)
+    payload["issue"]["user"]["login"] = "Bob"
+    with pytest.raises(ValueError, match="GitHub account"):
+        issue_pr.process("disclose", payload, REPO, "123")
+    assert not state["prs"]
+    assert not (registry.location(root, claim_id) / "disclosure.json").exists()
+
+
+def test_account_check_uses_issue_author(automation, sealed):
+    _, state = automation
+    state["uploads"][URL] = (sealed / "record.json").read_bytes()
+    payload = event(URL, author="alice")
+    payload["sender"] = {"login": "Maintainer"}
+    assert issue_pr.process("submit", payload, REPO, "123").endswith("/pull/1")
