@@ -9,7 +9,7 @@ from opentimestamps.core.timestamp import DetachedTimestampFile
 from claim.encryption import new_key
 from claim.files import write_private
 from claim.registry import accept
-from claim.workflow import seal
+from claim.workflow import disclose, seal
 
 
 @pytest.fixture
@@ -51,3 +51,10 @@ def receipt(sealed, tmp_path):
 def accepted(sealed, receipt, tmp_path):
     root = tmp_path / "registry"
     return root, accept(root, sealed, receipt)
+
+
+@pytest.fixture
+def disclosed(sealed, tmp_path, key):
+    output = tmp_path / "disclosed"
+    disclose(sealed, output, key)
+    return output
