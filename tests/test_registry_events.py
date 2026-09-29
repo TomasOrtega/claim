@@ -47,6 +47,15 @@ def test_withdrawn_disclosure(accepted, disclosed, tmp_path):
     assert index["claims"][0]["events"] == ["withdrawn", "disclosed"]
 
 
+def test_corrupt_disclosed_storage(accepted, disclosed, tmp_path):
+    registry.disclose(*accepted, disclosed)
+    directory = registry.location(*accepted)
+    (directory / "disclosure" / "proof").write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="opening does not match"):
+        registry.export_claim(directory, tmp_path / "public")
+    assert not (tmp_path / "public").exists()
+
+
 def test_disclose_claim(accepted, disclosed):
     root, claim_id = accepted
     original = registry.read_claim(registry.location(root, claim_id))
