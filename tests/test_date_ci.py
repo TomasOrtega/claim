@@ -2,7 +2,7 @@ import pytest
 from test_dates import DATE, RUN
 from test_git_registry import git
 
-from claim import dates, record, registry
+from claim import cli, dates, record, registry
 
 
 @pytest.fixture
@@ -44,3 +44,9 @@ def test_changed_pushed_record(pushed):
     path.write_bytes(b" " + path.read_bytes())
     with pytest.raises(ValueError, match="pushed record"):
         dates.record_push(root, commit, DATE, RUN)
+
+
+def test_date_command(pushed, capsys):
+    root, _, commit = pushed
+    assert cli.main(["date-claims", str(root), commit, DATE, RUN]) == 0
+    assert capsys.readouterr().out.strip() == "1"

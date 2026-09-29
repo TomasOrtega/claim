@@ -1,9 +1,16 @@
 from pathlib import Path
 
-from claim import registry
+from claim import dates, registry
 
 
 def add_commands(commands) -> None:
+    date = commands.add_parser(
+        "date-claims", help="record dates for a pushed registry commit"
+    )
+    date.add_argument("registry", type=Path)
+    for argument in ("commit", "date", "run_url"):
+        date.add_argument(argument)
+    date.set_defaults(run=run)
     command = commands.add_parser("accept", help="accept an encrypted claim")
     for argument in ("registry", "source", "receipt"):
         command.add_argument(argument, type=Path)
@@ -34,7 +41,9 @@ def add_commands(commands) -> None:
 
 
 def run(args) -> int:
-    if args.command == "accept":
+    if args.command == "date-claims":
+        print(dates.record_push(args.registry, args.commit, args.date, args.run_url))
+    elif args.command == "accept":
         print(registry.accept(args.registry, args.source, args.receipt))
     elif args.command == "add-receipt":
         registry.add_receipt(args.registry, args.claim_id, args.receipt)
