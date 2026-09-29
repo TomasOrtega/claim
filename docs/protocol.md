@@ -1,63 +1,43 @@
-# Protocol v1
+# How claims work
 
-We trust GitHub and the registry maintainers to record claim dates honestly.
-Correctness, authorship and independent discovery require separate evidence.
+Creating a claim saves an encrypted copy of your work and a small public record.
+You keep the encrypted copy and its private key. The registry receives only the
+public record and adds a date.
 
-## Commitment
+Each record names one GitHub account: the person submitting the claim.
+Put all coauthors' names in the work before creating it.
 
-For artifact bytes `A`, a fresh 32-byte salt `S` and SHA-256 `H`:
+Whenever you want, decrypt and publish the original work. The registry checks
+that it matches your earlier record and saves a link to it. Editing the work
+requires a new claim.
+
+Dates rely on GitHub and the maintainers. The registry does not check mathematical
+correctness or decide who discovered a result first. See [your claim date](dates.md).
+
+<details>
+<summary>Technical format (version 1)</summary>
+
+For work bytes `A`, a random 32-byte salt `S`, and SHA-256 `H`:
 
 ```text
 C = H(b"claim:commit:v1\0" || S || H(A))
 ```
 
-Hash raw digests; encode `C` as 64 lowercase hexadecimal characters. Preserve
-artifact bytes unchanged, including line endings. Empty and binary inputs work.
-Generate salts with `secrets.token_bytes(32)`; other lengths raise `ValueError`.
-Opening recomputes `C` and checks for an exact match.
+Use raw digests internally and lowercase hexadecimal for `C`.
 
-## Public records
+- `record.json` contains `version: 1`, `commitment: C` and `authors`: a list with one
+  GitHub username. Its exact bytes determine the claim ID (SHA-256). Reject
+  duplicate keys, extra fields and invalid types.
+- The private file uses Fernet to encrypt `b"claim:opening:v1\0" || S || A`.
+  One key can be reused across claims.
+- `date.json` contains `record_sha256`, `commit`, `run_url` and `recorded_at`:
+  GitHub's workflow creation time in UTC.
+- `disclosure.json` contains `proof_url` (pinned to a full GitHub commit), `salt`
+  (hexadecimal), `proof_sha256` and `verified_at` (UTC). Proof files stay in the
+  author's repository.
+- Disclosure and withdrawal are recorded without deleting earlier records.
+  Withdrawal keeps the claim in the count for its GitHub user.
 
-A UTF-8 JSON record contains `version: 1`, `commitment` and `authors`, a list
-containing exactly one GitHub username. The submission and disclosure workflows
-check that it matches the account opening the issue, ignoring letter case.
-The bot opens the PR on that user's behalf. Coauthors belong in the proof text
-before sealing, not in the registry record.
-Reject duplicate JSON keys, extra fields and invalid types.
-The claim ID is SHA-256 of the exact record bytes, including the username.
+Limits: 10 MiB for work, 14 MiB for its encrypted copy, and 64 KiB for a record.
 
-The submission PR includes `date.json`: the record hash, record commit, run URL
-and GitHub's workflow creation time in UTC. Merging preserves that date.
-See [claim dates](dates.md).
-
-## Encrypted storage
-
-Researchers keep their encrypted files and keys; only records go to the registry.
-One researcher key can encrypt many projects. Use Fernet from `cryptography` to
-encrypt `b"claim:opening:v1\0" || S || A`. Its library supplies fresh randomness
-and checks authentication before decryption. The format exposes ciphertext length
-and encryption time, not the proof or salt. [Fernet format](https://cryptography.io/en/stable/fernet/)
-
-Generate the key with `Fernet.generate_key()`. Keep two secure copies in separate
-places, such as a password manager and an encrypted backup. Never put it in the
-project repository or publish it. Losing every copy makes encrypted claims
-unrecoverable. This is an encryption key, not a signing key or a commitment salt.
-
-## Disclosure
-
-Publish the record, date and status. Keep the artifact,
-salt, unsalted artifact hash and theorem metadata private until disclosure.
-Publish the original artifact in an author-owned public GitHub repository.
-Submit its file URL pinned to a full commit hash and the salt in hexadecimal.
-The registry downloads and checks the artifact, then saves `disclosure.json` with
-`proof_url`, `salt`, `proof_sha256` and `verified_at` (UTC). It stores no proof bytes.
-Keep the encryption key private. Revised proofs need new commitments.
-
-## Status
-
-Claims start sealed. Append disclosure or withdrawal events without
-changing the original record or removing claims from author counts. Withdrawal
-does not hide an earlier disclosure. Events record operator decisions; they do
-not have recorded dates.
-
-Undated claims display “Awaiting CI”.
+</details>
