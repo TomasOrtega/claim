@@ -18,9 +18,10 @@ put all authors' names in the proof itself before creating the claim.
 2. **Submit the public file.** Sign in with the GitHub account you used during
    setup, then attach only `record.json` to [Submit a claim](https://github.com/TomasOrtega/claim/issues/new?template=submit-claim.yml).
    The system records a date and sends your submission to the maintainers for review.
-3. **Share your proof when ready.** Follow the [publishing instructions](docs/storage.md)
-   to put the original proof in your own public GitHub repository and link it to
-   your claim. Its original date stays unchanged.
+3. **Decrypt and publish your proof whenever you want.** Follow the
+   [publishing instructions](docs/storage.md) to decrypt your saved proof,
+   publish it on your own GitHub account, and link it to your earlier claim.
+   The original claim date stays unchanged.
 
 Your private key unlocks the saved proof. Keep it in a password manager and a
 separate secure backup, and back up the saved claim folder too. Never share the
