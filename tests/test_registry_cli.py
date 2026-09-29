@@ -26,7 +26,7 @@ def test_export_command(accepted, tmp_path):
 
 def test_accept_command(sealed, tmp_path, capsys):
     root = tmp_path / "registry"
-    assert cli.main(["accept", str(root), str(sealed)]) == 0
+    assert cli.main(["accept", str(root), str(sealed / "record.json")]) == 0
     claim_id = capsys.readouterr().out.strip()
     assert (root / "claims" / claim_id / "record.json").read_bytes() == (
         sealed / "record.json"

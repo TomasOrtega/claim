@@ -29,7 +29,7 @@ def sealed(tmp_path, key):
 @pytest.fixture
 def accepted(sealed, tmp_path):
     root = tmp_path / "registry"
-    return root, accept(root, sealed)
+    return root, accept(root, sealed / "record.json")
 
 
 @pytest.fixture

@@ -14,20 +14,18 @@ def test_invalid_claim_path(tmp_path, claim_id):
 
 def test_accept(sealed, tmp_path):
     root = tmp_path / "registry"
-    claim_id = registry.accept(root, sealed)
+    claim_id = registry.accept(root, sealed / "record.json")
     entry = registry.location(root, claim_id)
     assert record.record_id((entry / "record.json").read_bytes()) == claim_id
-    assert (entry / "opening.fernet").read_bytes() == (
-        sealed / "opening.fernet"
-    ).read_bytes()
+    assert {path.name for path in entry.iterdir()} == {"record.json"}
 
 
 def test_duplicate_intake(accepted, sealed):
     root, claim_id = accepted
-    before = (registry.location(root, claim_id) / "opening.fernet").read_bytes()
+    before = registry.read_claim(registry.location(root, claim_id))
     with pytest.raises(FileExistsError):
-        registry.accept(root, sealed)
-    assert (registry.location(root, claim_id) / "opening.fernet").read_bytes() == before
+        registry.accept(root, sealed / "record.json")
+    assert registry.read_claim(registry.location(root, claim_id)) == before
 
 
 def test_changed_registered_record(accepted):
@@ -79,16 +77,10 @@ def test_export_inside_registry(accepted):
         registry.export(root, root / "public")
 
 
-def test_submission(sealed):
-    data, token = registry.read_submission(sealed)
-    assert data == (sealed / "record.json").read_bytes()
-    assert token == (sealed / "opening.fernet").read_bytes()
-
-
-def test_submission_with_key(sealed, key):
-    (sealed / "key").write_bytes(key)
-    with pytest.raises(ValueError, match="unexpected submission files"):
-        registry.read_submission(sealed)
+def test_reject_encrypted_submission(sealed, tmp_path):
+    with pytest.raises(ValueError):
+        registry.accept(tmp_path / "registry", sealed / "opening.fernet")
+    assert not (tmp_path / "registry").exists()
 
 
 def test_export_date(accepted, tmp_path):

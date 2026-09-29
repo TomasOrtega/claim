@@ -1,9 +1,9 @@
 import subprocess
 
-from claim import registry, storage
+from claim import registry
 
 
-def test_git_restore(accepted, tmp_path, key):
+def test_git_restore(accepted, tmp_path):
     root, claim_id = accepted
     git(root, "init")
     git(root, "add", ".")
@@ -21,7 +21,7 @@ def test_git_restore(accepted, tmp_path, key):
     assert registry.read_claim(entry) == registry.read_claim(
         registry.location(root, claim_id)
     )
-    assert storage.load_opening(entry / "opening.fernet", key)[0] == b"proof\r\n\xff"
+    assert not (entry / "opening.fernet").exists()
 
 
 def git(path, *args):

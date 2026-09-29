@@ -11,7 +11,7 @@ def add_commands(commands) -> None:
     for argument in ("commit", "date", "run_url"):
         date.add_argument(argument)
     date.set_defaults(run=run)
-    command = commands.add_parser("accept", help="accept an encrypted claim")
+    command = commands.add_parser("accept", help="accept a public record.json")
     for argument in ("registry", "source"):
         command.add_argument(argument, type=Path)
     command.set_defaults(run=run)
