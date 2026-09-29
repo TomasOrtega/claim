@@ -17,6 +17,8 @@ def capture(command, *, cwd=None, env=None, limit=128 * 1024 * 1024, timeout=300
             if process.wait(timeout=10):
                 raise ValueError("Lean command failed")
             return data
+        except TimeoutError as exc:
+            raise TimeoutError("Lean command timed out") from exc
         finally:
             with suppress(ProcessLookupError):
                 os.killpg(process.pid, signal.SIGKILL)

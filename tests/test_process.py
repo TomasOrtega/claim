@@ -16,5 +16,5 @@ def test_capture_failed():
 
 
 def test_capture_timeout():
-    with pytest.raises(TimeoutError):
+    with pytest.raises(TimeoutError, match="Lean command timed out"):
         capture([sys.executable, "-c", "import time; time.sleep(5)"], timeout=0.1)
