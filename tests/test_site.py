@@ -1,3 +1,5 @@
+from test_dates import DATE, RUN
+
 from claim import site
 
 
@@ -28,3 +30,14 @@ def test_author_escaping():
     html = site.claim_row(entry)
     assert "<script>" not in html and "&lt;script&gt;" in html
     assert "Awaiting CI" in html
+
+
+def test_recorded_date():
+    entry = {
+        "id": "a" * 64,
+        "authors": ["Alice"],
+        "status": "sealed",
+        "date": {"recorded_at": DATE, "run_url": RUN},
+    }
+    html = site.claim_row(entry)
+    assert DATE in html and RUN in html and 'date.json"' in html

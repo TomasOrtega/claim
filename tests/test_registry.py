@@ -1,8 +1,9 @@
 import json
 
 import pytest
+from test_dates import COMMIT, DATE, RUN
 
-from claim import record, registry
+from claim import dates, record, registry
 
 
 @pytest.mark.parametrize("claim_id", ["../secret", "", "A" * 64, "a" * 63])
@@ -88,3 +89,12 @@ def test_submission_with_key(sealed, key):
     (sealed / "key").write_bytes(key)
     with pytest.raises(ValueError, match="unexpected submission files"):
         registry.read_submission(sealed)
+
+
+def test_export_date(accepted, tmp_path):
+    directory = registry.location(*accepted)
+    dates.save(directory, registry.read_claim(directory), DATE, COMMIT, RUN)
+    output = tmp_path / "public"
+    entry = registry.export_claim(directory, output)
+    assert entry["date"]["recorded_at"] == DATE
+    assert (output / "date.json").read_bytes() == (directory / "date.json").read_bytes()
