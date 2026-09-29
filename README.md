@@ -5,9 +5,10 @@ Ideally, this repo removes (or dampens) the incentive to publish raw AI-generate
 
 1. Researchers can privately commit to a theorem/proof without revealing it.
 2. Record a public claim date through GitHub.
-3. Ideally include a Lean verification.
-4. Reveal only the commitment authors, not their contents, to discourage mass speculative claims.
-5. Allow later disclosure of the proof and salt to establish independent discovery if someone else publishes first.
+3. Reveal only the commitment authors, not their contents, to discourage mass speculative claims.
+4. Allow later disclosure of the proof and salt to establish independent discovery if someone else publishes first.
+
+Researchers are responsible for checking their proofs.
 
 This project is inspired by Gonzalo Cao-Labora's tweets: https://x.com/GonZalocla/status/2104615564291563591.
 
@@ -30,5 +31,4 @@ Submit `~/my-claim` to the [registry](docs/registry.md). CI records its date aft
 the operator pushes it to GitHub; we trust GitHub and the registry maintainers.
 When ready, [publish the proof and salt](docs/storage.md). Never publish the key.
 
-More: [hosting a registry](docs/registry.md), [Lean checks](docs/lean.md),
-[protocol](docs/protocol.md).
+More: [hosting a registry](docs/registry.md), [protocol](docs/protocol.md).

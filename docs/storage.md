@@ -9,6 +9,9 @@ uv run python -m claim disclose ~/my-claim ~/disclosed --key ~/researcher.key
 uv run python -m claim verify ~/disclosed
 ```
 
+Proofs can be PDFs, Lean source files or ZIP archives. Their bytes are preserved
+unchanged; checking their correctness is the researcher's responsibility.
+
 Generate the key once; reuse it across projects. Store its 44-character ASCII text
 in a password manager and a separate secure backup. Check that the backup can
 decrypt a saved opening. Losing all copies makes encrypted proofs unrecoverable.
@@ -21,6 +24,6 @@ Disclosure exports `proof` (original bytes), `salt` (32 raw bytes), and the unch
 The registry keeps the [claim date](dates.md) separately.
 
 Commands refuse existing output files or directories. An interrupted seal can
-leave a partial directory; only a successful run produces a checked claim.
+leave a partial directory; only a successful run produces a complete claim.
 Limits: 10 MiB proofs, 14 MiB encrypted openings, 64 KiB records. Files are read
 into memory. Private directories use mode `0700`, files `0600`.

@@ -1,10 +1,7 @@
-import json
-
 import pytest
 
 from claim.encryption import new_key
 from claim.files import write_private
-from claim.lean import TOOLCHAIN
 from claim.registry import accept
 from claim.workflow import disclose, seal
 
@@ -40,19 +37,3 @@ def disclosed(sealed, tmp_path, key):
     output = tmp_path / "disclosed"
     disclose(sealed, output, key)
     return output
-
-
-@pytest.fixture
-def lean_project(tmp_path):
-    (tmp_path / "lean-toolchain").write_text(TOOLCHAIN + "\n")
-    (tmp_path / "lake-manifest.json").write_text(
-        json.dumps(
-            {
-                "version": "1.2.0",
-                "name": "Proof",
-                "packagesDir": ".lake/packages",
-                "packages": [],
-            }
-        )
-    )
-    return tmp_path

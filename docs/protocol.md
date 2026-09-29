@@ -54,4 +54,3 @@ does not hide an earlier disclosure. Events record operator decisions; they do
 not have recorded dates.
 
 Undated claims display “Awaiting CI”.
-Label private Lean checks as author-reported until independently checked.

@@ -4,7 +4,7 @@ from subprocess import TimeoutExpired
 
 from cryptography.fernet import InvalidToken
 
-from claim import lean_cli, registry_cli, workflow
+from claim import registry_cli, workflow
 from claim.keys import load_key, save_key
 
 
@@ -25,7 +25,6 @@ def main(argv=None) -> int:
     verify = commands.add_parser("verify", help="verify a disclosed opening")
     verify.add_argument("directory", type=Path)
     registry_cli.add_commands(commands)
-    lean_cli.add_commands(commands)
     args = parser.parse_args(argv)
     try:
         if args.command == "keygen":
