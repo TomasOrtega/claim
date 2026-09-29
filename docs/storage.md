@@ -1,6 +1,14 @@
 # Local commands
 
-Run from this checkout. Keep private files outside it. Replace the paths and GitHub username:
+Install [uv](https://docs.astral.sh/uv/), then download this project and open its folder:
+
+```sh
+git clone https://github.com/TomasOrtega/claim.git
+cd claim
+```
+
+Run the following commands from that folder. Keep private files outside it.
+Replace the paths and GitHub username:
 
 ```sh
 uv run python -m claim keygen ~/researcher.key
