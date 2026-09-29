@@ -6,6 +6,19 @@ def test_registry_page():
     assert "Alice &amp; Bob: 2" in html and "index.json" in html
 
 
+def test_disclosure_links():
+    entry = {
+        "id": "a" * 64,
+        "authors": ["Alice"],
+        "status": "withdrawn",
+        "timestamp": {"status": "pending"},
+        "receipts": [],
+        "events": ["disclosed", "withdrawn"],
+    }
+    html = site.claim_row(entry)
+    assert '/proof"' in html and '/salt"' in html and "events/0002.json" in html
+
+
 def test_author_escaping():
     entry = {
         "id": "a" * 64,

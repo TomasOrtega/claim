@@ -17,6 +17,12 @@ def claim_row(entry: dict) -> str:
         for i, name in enumerate(entry["receipts"], 1)
     )
     date = escape(timestamp_label(entry["timestamp"]))
+    if "disclosed" in entry.get("events", []):
+        evidence += f' <a href="./{claim_id}/proof">proof</a> <a href="./{claim_id}/salt">salt</a>'
+    evidence += " ".join(
+        f' <a href="./{claim_id}/events/{i:04d}.json">{escape(event)}</a>'
+        for i, event in enumerate(entry.get("events", []), 1)
+    )
     return f'<tr><td><a href="./{claim_id}/record.json">{claim_id[:12]}</a></td><td>{authors}</td><td>{escape(entry["status"])}</td><td>{date}</td><td>{evidence}</td></tr>'
 
 
