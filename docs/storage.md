@@ -1,10 +1,10 @@
 # Local commands
 
-Run from this checkout. Keep private files outside it. Replace the paths and name:
+Run from this checkout. Keep private files outside it. Replace the paths and GitHub username:
 
 ```sh
 uv run python -m claim keygen ~/researcher.key
-uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author "Your Name"
+uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author YOUR_GITHUB_USERNAME
 uv run python -m claim disclose ~/my-claim ~/disclosed --key ~/researcher.key
 uv run python -m claim verify ~/disclosed
 ```
@@ -16,7 +16,9 @@ Generate the key once; reuse it across projects. Store its 44-character ASCII te
 in a password manager and a separate secure backup. Check that the backup can
 decrypt a saved opening. Losing all copies makes encrypted proofs unrecoverable.
 
-Repeat `--author` for coauthors. Sealing writes `opening.fernet` and `record.json`.
+Use `--author` once, with the GitHub username that will submit the claim.
+Put coauthors in the proof text before sealing; the registry lists only your account.
+Sealing writes `opening.fernet` and `record.json`.
 Back up the encrypted opening too. Only the record can be public before disclosure.
 
 Disclosure exports `proof` (original bytes), `salt` (32 raw bytes), and `record.json`.
@@ -26,7 +28,7 @@ The command prints the claim ID and salt for the disclosure form. Never publish 
    You can rename it, for example to `proof.pdf`, without changing its contents.
 2. Open the file on GitHub and press `y` to get a [permanent link](https://docs.github.com/en/repositories/working-with-files/using-files/getting-permanent-links-to-files).
 3. Fill in [Disclose a claim](https://github.com/TomasOrtega/claim/issues/new?template=disclose-claim.yml)
-   with the claim ID, proof link and salt printed by the command.
+   from the same GitHub account, with the claim ID, proof link and salt printed by the command.
 
 The bot downloads the proof, checks the commitment and opens a PR containing only
 the link, salt, proof hash and verification date. The original [claim date](dates.md)

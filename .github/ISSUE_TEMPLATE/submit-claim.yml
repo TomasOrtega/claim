@@ -4,7 +4,10 @@ title: "[Claim] "
 body:
   - type: markdown
     attributes:
-      value: Attach only `record.json`. Keep your proof, salt, encrypted opening and key private and backed up.
+      value: |
+        Attach only `record.json`. Its sole author must be your GitHub username.
+        Put coauthors in the proof text before sealing it.
+        Keep your proof, salt, encrypted opening and key private and backed up.
   - type: textarea
     id: record
     attributes:
