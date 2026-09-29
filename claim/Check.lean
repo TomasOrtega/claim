@@ -26,7 +26,7 @@ unsafe def main (args : List String) : IO Unit := do
   withImportModules #[{module := mod.toName}] {} fun env => do
     let some (.thmInfo thm) := env.find? decl.toName
       | throw <| IO.userError "expected a theorem declaration"
-    discard <| (← mkEmptyEnvironment).toKernelEnv.replay env.constants.map₁
     discard <| audit env trusted decl.toName
+    discard <| (← mkEmptyEnvironment).toKernelEnv.replay env.constants.map₁
     let statement ← (Meta.ppExpr thm.type).run'.toIO' {fileName := "", fileMap := default} {env}
     IO.println statement

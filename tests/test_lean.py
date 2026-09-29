@@ -1,15 +1,12 @@
-import json
-
 import pytest
 
-from claim.lean import TOOLCHAIN, validate_name, validate_project
+from claim.lean import validate_name, validate_project
 
 
-@pytest.fixture
-def lean_project(tmp_path):
-    (tmp_path / "lean-toolchain").write_text(TOOLCHAIN + "\n")
-    (tmp_path / "lake-manifest.json").write_text(json.dumps({"packages": []}))
-    return tmp_path
+def test_lean_rejects_build_cache(lean_project):
+    (lean_project / "Proof.olean").touch()
+    with pytest.raises(ValueError, match="without build outputs"):
+        validate_project(lean_project)
 
 
 def test_pinned_lean_project(lean_project):
