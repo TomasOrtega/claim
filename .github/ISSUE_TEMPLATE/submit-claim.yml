@@ -11,7 +11,10 @@ body:
   - type: textarea
     id: record
     attributes:
-      label: Record
-      description: Drag your record.json file here. Attach one file, without changing its contents.
+      label: Upload record.json
+      description: >-
+        This text box accepts file uploads. Drag your record.json file into it;
+        GitHub will upload the file and insert a link automatically.
+        Attach one file. You do not need to paste its contents.
     validations:
       required: true
