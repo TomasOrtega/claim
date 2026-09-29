@@ -19,6 +19,14 @@ def test_withdraw_claim(accepted):
     assert registry.read_claim(directory) == original
 
 
+def test_export_withdrawal(accepted, tmp_path):
+    registry.withdraw(*accepted)
+    output = tmp_path / "public"
+    entry = registry.export_claim(registry.location(*accepted), output)
+    assert entry["status"] == "withdrawn" and entry["events"] == ["withdrawn"]
+    assert events.read(output) == ["withdrawn"]
+
+
 def test_disclose_claim(accepted, disclosed):
     root, claim_id = accepted
     original = registry.read_claim(registry.location(root, claim_id))

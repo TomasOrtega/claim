@@ -105,9 +105,11 @@ def timestamp_status(data: bytes, proofs) -> dict:
 def export_claim(directory: Path, output: Path) -> dict:
     data = read_claim(directory)
     proofs = read_receipts(directory, data)
+    history = events.read(directory)
     entry = record.load_record(data) | {
         "id": directory.name,
-        "status": "sealed",
+        "status": events.status(history),
+        "events": history,
         "timestamp": timestamp_status(data, proofs.values()),
         "receipts": list(proofs),
     }
@@ -115,6 +117,8 @@ def export_claim(directory: Path, output: Path) -> dict:
     files.write_private(output / "record.json", data)
     for name, proof in proofs.items():
         files.write_private(output / name, proof)
+    for event in history:
+        events.append(output, event)
     return entry
 
 
