@@ -3,7 +3,9 @@ import shutil
 
 import pytest
 
+from claim.archives import unpack
 from claim.lean import TOOLCHAIN, build, check_build
+from claim.lean_worker import objects
 
 pytestmark = pytest.mark.skipif(
     not os.getenv("CLAIM_TEST_LEAN"), reason="opt-in Lean integration"
@@ -22,10 +24,11 @@ def built_project(lean_project):
     return lean_project
 
 
-def test_real_lean(built_project):
-    statement = check_build(
-        built_project, "Proof", "result", ["elan", "run", TOOLCHAIN]
-    )
+def test_real_lean(built_project, tmp_path):
+    transferred = tmp_path / "transferred"
+    transferred.mkdir()
+    unpack(objects(built_project), transferred)
+    statement = check_build(transferred, "Proof", "result", ["elan", "run", TOOLCHAIN])
     assert "Eq" in statement and "2" in statement
 
 
