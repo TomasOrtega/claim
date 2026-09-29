@@ -1,4 +1,14 @@
+import pytest
+
 from claim import events, registry, workflow
+
+
+@pytest.mark.parametrize("name", ["proof", "salt", "record.json"])
+def test_changed_disclosure(accepted, disclosed, name):
+    (disclosed / name).write_bytes(b"changed")
+    with pytest.raises(ValueError):
+        registry.disclose(*accepted, disclosed)
+    assert events.read(registry.location(*accepted)) == []
 
 
 def test_disclose_claim(accepted, disclosed):
