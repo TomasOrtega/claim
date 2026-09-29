@@ -1,39 +1,35 @@
 # claim
-Claim registry for mathematics
 
-Ideally, this repo removes (or dampens) the incentive to publish raw AI-generated proofs immediately, so there is more time to produce a nice exposition.
+Record a mathematical proof with a date while keeping the proof private.
 
-1. Researchers can privately commit to a theorem/proof without revealing it.
-2. Record a public claim date through GitHub.
-3. Reveal only the submitting GitHub account, not the claim's contents, to discourage mass speculative claims.
-4. Allow later disclosure of the proof and salt to establish independent discovery if someone else publishes first.
+The aim is to give researchers time to check their work and write a clear
+explanation before publishing, including when they use AI. When you later share
+the original proof, others can check that it matches your earlier record.
 
-We suggest researchers add a Lean verification to their claims.
-
-This project is inspired by Gonzalo Cao-Labora's tweets: https://x.com/GonZalocla/status/2104615564291563591.
+Your GitHub username and the submission date are public. The proof stays private
+until you choose to share it. Each claim has one account responsible for it;
+put all authors' names in the proof itself before creating the claim.
 
 ## Quickstart
 
-Install [uv](https://docs.astral.sh/uv/), then run these commands with your proof
-file and GitHub username:
+1. **Prepare your claim.** Follow the [setup guide](docs/storage.md) to save an
+   encrypted copy of your proof and create a small public file called `record.json`.
+   This currently requires running a few commands on your computer.
+2. **Submit the public file.** Sign in with the GitHub account you used during
+   setup, then attach only `record.json` to [Submit a claim](https://github.com/TomasOrtega/claim/issues/new?template=submit-claim.yml).
+   The system records a date and sends your submission to the maintainers for review.
+3. **Share your proof when ready.** Follow the [publishing instructions](docs/storage.md)
+   to put the original proof in your own public GitHub repository and link it to
+   your claim. Its original date stays unchanged.
 
-```sh
-git clone https://github.com/TomasOrtega/claim.git
-cd claim
-uv run python -m claim keygen ~/researcher.key
-uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author YOUR_GITHUB_USERNAME
-```
+Your private key unlocks the saved proof. Keep it in a password manager and a
+separate secure backup, and back up the saved claim folder too. Never share the
+key: if you lose every copy, the encrypted proof cannot be recovered.
 
-Each claim has one registry author: the GitHub user submitting it.
-List coauthors in the proof text before sealing it.
+The registry does not check whether a proof is correct. We trust GitHub and the
+maintainers to record dates honestly. We encourage including a proof checked
+with Lean, a tool for verifying mathematics.
 
-Generate the key once and reuse it. Keep it in a password manager and a separate
-secure backup; losing every copy prevents decryption. Back up `~/my-claim` too.
+For technical details, see the [protocol](docs/protocol.md).
 
-Upload only `~/my-claim/record.json` using [Submit a claim](https://github.com/TomasOrtega/claim/issues/new?template=submit-claim.yml).
-A bot opens a PR on your behalf with the claim and its date, before maintainer review.
-The GitHub account opening the issue must match the record's author.
-We trust GitHub and the registry maintainers to record dates honestly.
-When ready, [publish the proof and salt](docs/storage.md). Never publish the key.
-
-See the [protocol](docs/protocol.md).
+Inspired by [Gonzalo Cao-Labora's posts](https://x.com/GonZalocla/status/2104615564291563591).
