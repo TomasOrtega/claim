@@ -1,6 +1,8 @@
+from hashlib import sha256
+
 import pytest
 
-from claim.commitment import commit, new_salt, verify_opening
+from claim.commitment import commit, commit_digest, new_salt, verify_opening
 
 ARTIFACT = b"theorem: 1 + 1 = 2\n"
 SALT = bytes(range(32))
@@ -9,6 +11,10 @@ COMMITMENT = "d8c1f7f6682114f2e776e755c16f7f73d27ae7546c561ff9679a5ea5e35b25cb"
 
 def test_commitment_vector():
     assert commit(ARTIFACT, SALT) == COMMITMENT
+
+
+def test_commitment_from_digest():
+    assert commit_digest(sha256(ARTIFACT).digest(), SALT) == COMMITMENT
 
 
 @pytest.mark.parametrize("length", [0, 1, 31, 33, 64])

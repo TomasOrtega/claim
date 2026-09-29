@@ -3,9 +3,15 @@ from hashlib import sha256
 
 
 def commit(artifact: bytes, salt: bytes) -> str:
+    return commit_digest(sha256(artifact).digest(), salt)
+
+
+def commit_digest(digest: bytes, salt: bytes) -> str:
     if len(salt) != 32:
         raise ValueError("salt must be exactly 32 bytes")
-    return sha256(b"claim:commit:v1\0" + salt + sha256(artifact).digest()).hexdigest()
+    if len(digest) != 32:
+        raise ValueError("digest must be exactly 32 bytes")
+    return sha256(b"claim:commit:v1\0" + salt + digest).hexdigest()
 
 
 def new_salt() -> bytes:
