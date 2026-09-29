@@ -6,7 +6,7 @@ from pathlib import Path
 
 from bitcoin.rpc import JSONRPCError
 
-from claim import encryption, files, record, site, timestamp
+from claim import encryption, events, files, record, site, timestamp, workflow
 from claim.limits import MAX_OPENING_BYTES, MAX_TIMESTAMP_BYTES
 
 
@@ -64,6 +64,23 @@ def add_receipt(root: Path, claim_id: str, proof_path: Path) -> None:
     directory = location(root, claim_id)
     data = read_claim(directory)
     save_receipt(directory, data, files.read_limited(proof_path, MAX_TIMESTAMP_BYTES))
+
+
+def disclose(root: Path, claim_id: str, source: Path) -> None:
+    directory = location(root, claim_id)
+    original = read_claim(directory)
+    snapshot = workflow.read_disclosure(source)
+    if snapshot["record.json"] != original:
+        raise ValueError("disclosure record does not match registered record")
+    workflow.check_opening(original, snapshot["proof"], snapshot["salt"])
+    history = events.read(directory)
+    if "disclosed" in history:
+        raise ValueError("claim already disclosed")
+    output = directory / "disclosure"
+    files.create_private_directory(output)
+    for name, data in snapshot.items():
+        files.write_private(output / name, data)
+    events.append(directory, "disclosed")
 
 
 def timestamp_status(data: bytes, proofs) -> dict:
