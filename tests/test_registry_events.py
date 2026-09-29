@@ -56,6 +56,14 @@ def test_corrupt_disclosed_storage(accepted, disclosed, tmp_path):
     assert not (tmp_path / "public").exists()
 
 
+def test_verification_bundle(accepted, disclosed, tmp_path):
+    registry.disclose(*accepted, disclosed)
+    registry.bundle(*accepted, tmp_path / "bundle")
+    assert workflow.verify(tmp_path / "bundle") == workflow.verify(disclosed)
+    assert list((tmp_path / "bundle").glob("*.ots"))
+    assert not (tmp_path / "bundle" / "opening.fernet").exists()
+
+
 def test_disclose_claim(accepted, disclosed):
     root, claim_id = accepted
     original = registry.read_claim(registry.location(root, claim_id))

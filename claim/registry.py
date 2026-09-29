@@ -133,6 +133,14 @@ def export_claim(directory: Path, output: Path) -> dict:
     return entry
 
 
+def bundle(root: Path, claim_id: str, output: Path) -> None:
+    directory = location(root, claim_id)
+    if "disclosed" not in events.read(directory):
+        raise ValueError("claim has not been disclosed")
+    export_claim(directory, output)
+    preserve_git_bytes(output)
+
+
 def export(root: Path, output: Path) -> None:
     if output.resolve().is_relative_to(root.resolve()):
         raise ValueError("public output must be outside the registry")
