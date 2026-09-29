@@ -33,3 +33,21 @@ Publish only after export succeeds; interrupted commands can leave partial outpu
 Keep a separate clone of the private repository as a backup. Test a restore by
 running `disclose` on `claims/ID/` with the researcher's backup key, then `verify`
 on the disclosure. The key must be backed up separately from the repository.
+
+## Disclosure and withdrawal
+
+Check the researcher's request before recording an event. Anyone with a copy of
+a disclosure can submit it; the software does not authenticate the requester.
+
+```sh
+uv run python -m claim accept-disclosure ~/claim-private CLAIM_ID ~/disclosed
+uv run python -m claim export-bundle ~/claim-private CLAIM_ID ~/bundle
+uv run python -m claim withdraw ~/claim-private CLAIM_ID
+```
+
+Disclosure checks the original record, proof and salt. Events are appended;
+withdrawal keeps the original record, disclosed files and author counts. Commit
+the updated private registry, then export and publish a fresh public site.
+
+The bundle contains the record, proof, salt, receipts and event history. It needs
+no encryption key. Follow [independent verification](verification.md).

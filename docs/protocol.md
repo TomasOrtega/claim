@@ -42,10 +42,12 @@ salt, unsalted artifact hash and theorem metadata private until disclosure.
 Disclose the original artifact and salt alongside the record and timestamp proof.
 Keep the encryption key private. Revised proofs need new commitments.
 
-## Status (planned)
+## Status
 
 Claims start sealed. Append disclosure or withdrawal events without
-changing the original record or erasing quota history.
+changing the original record or removing claims from author counts. Withdrawal
+does not hide an earlier disclosure. Events record operator decisions; they do
+not have independently verified dates.
 
 Timestamp status is pending, verified or failed. Only independent verification
 establishes the attested date; registry receipt time is separate.
