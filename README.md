@@ -11,32 +11,24 @@ Ideally, this repo removes (or dampens) the incentive to publish raw AI-generate
 
 This project is inspired by Gonzalo Cao-Labora's tweets: https://x.com/GonZalocla/status/2104615564291563591.
 
-## Current implementation
+## Quickstart
 
-The library creates commitments, saves encrypted proofs with their salts, and
-builds public records with self-declared author names. Use the [CLI](docs/storage.md)
-to seal, disclose and verify claims, and [timestamp](docs/timestamps.md) public
-records. Operators can [accept claims and export a public registry](docs/registry.md).
-Disclosures include verification bundles and event history. Optional [Lean checks](docs/lean.md)
-check a pinned project archive. See the [protocol](docs/protocol.md).
+Install [uv](https://docs.astral.sh/uv/), then run these commands with your proof
+file and name:
 
-Run Python examples from this checkout with `uv run python`:
-
-```python
-from claim.commitment import commit, new_salt, verify_opening
-
-artifact = b"theorem: 1 + 1 = 2\n"
-salt = new_salt()
-commitment = commit(artifact, salt)
-assert verify_opening(artifact, salt, commitment)
+```sh
+git clone https://github.com/TomasOrtega/claim.git
+cd claim
+uv run python -m claim keygen ~/researcher.key
+uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author "Your Name"
+uv run python -m claim stamp ~/my-claim/record.json ~/record.ots
 ```
 
-One researcher encryption key can protect many projects. Keep it in a password
-manager and a separate secure backup. Losing every copy makes encrypted proofs
-unrecoverable. Back up the encrypted files too. Publish only the proof and salt
-when disclosing a claim; never publish the key.
+Generate the key once and reuse it. Keep it in a password manager and a separate
+secure backup; losing every copy prevents decryption. Back up `~/my-claim` too.
 
-A matching opening establishes a commitment match, not a date, mathematical
-validity or authorship.
+The timestamp starts pending; [verify it after confirmation](docs/timestamps.md).
+When ready, [publish the proof and salt](docs/storage.md). Never publish the key.
 
-Run tests with `uv run pytest` and lint checks with `prek -a --quiet`.
+More: [hosting a registry](docs/registry.md), [Lean checks](docs/lean.md),
+[protocol](docs/protocol.md).
