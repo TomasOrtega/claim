@@ -20,12 +20,10 @@ def validate_record(record: dict) -> None:
     if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
         raise ValueError("invalid commitment")
     authors = record["authors"]
-    if not isinstance(authors, list) or not authors:
-        raise ValueError("invalid authors")
+    if not isinstance(authors, list) or len(authors) != 1:
+        raise ValueError("record must have exactly one GitHub author")
     if any(not isinstance(name, str) or not name.strip() for name in authors):
         raise ValueError("invalid author name")
-    if len(set(authors)) != len(authors):
-        raise ValueError("duplicate authors")
 
 
 def build_record(commitment: str, authors: list[str]) -> dict:

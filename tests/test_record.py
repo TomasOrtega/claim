@@ -5,7 +5,7 @@ from claim import record
 
 @pytest.fixture
 def public_record():
-    return {"version": 1, "commitment": "a" * 64, "authors": ["Alice", "José"]}
+    return {"version": 1, "commitment": "a" * 64, "authors": ["Alice"]}
 
 
 def test_valid_record(public_record):
@@ -44,7 +44,7 @@ def test_invalid_commitment(public_record, digest):
 @pytest.mark.parametrize("authors", [None, [], "Alice", {"name": "Alice"}, ("Alice",)])
 def test_invalid_author_list(public_record, authors):
     public_record["authors"] = authors
-    with pytest.raises(ValueError, match="invalid authors"):
+    with pytest.raises(ValueError, match="exactly one"):
         record.validate_record(public_record)
 
 
@@ -57,8 +57,14 @@ def test_invalid_author(public_record, author):
 
 def test_duplicate_authors(public_record):
     public_record["authors"] = ["Alice", "Alice"]
-    with pytest.raises(ValueError, match="duplicate authors"):
+    with pytest.raises(ValueError, match="exactly one"):
         record.validate_record(public_record)
+
+
+def test_multiple_authors_are_rejected():
+    value = {"version": 1, "commitment": "a" * 64, "authors": ["Alice", "Bob"]}
+    with pytest.raises(ValueError, match="exactly one"):
+        record.validate_record(value)
 
 
 @pytest.mark.parametrize("field", ["salt", "artifact", "key", "filename"])
@@ -75,19 +81,17 @@ def test_missing_field(public_record, field):
 
 
 def test_build_record(public_record):
-    assert record.build_record("a" * 64, ["Alice", "José"]) == public_record
+    assert record.build_record("a" * 64, ["Alice"]) == public_record
 
 
 def test_author_snapshot(public_record):
     built = record.build_record(public_record["commitment"], public_record["authors"])
     public_record["authors"].clear()
-    assert built["authors"] == ["Alice", "José"]
+    assert built["authors"] == ["Alice"]
 
 
 def test_dump_record(public_record):
-    expected = (
-        '{"authors":["Alice","José"],"commitment":"' + "a" * 64 + '","version":1}\n'
-    )
+    expected = '{"authors":["Alice"],"commitment":"' + "a" * 64 + '","version":1}\n'
     assert record.dump_record(public_record) == expected.encode("utf-8")
 
 
