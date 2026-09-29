@@ -1,53 +1,54 @@
-# Local commands
+# Create and publish a claim
 
-Install [uv](https://docs.astral.sh/uv/), then download this project and open its folder:
+## Set up once
+
+Install [Git](https://git-scm.com/downloads) and [uv](https://docs.astral.sh/uv/).
+Open a terminal and paste these commands:
 
 ```sh
 git clone https://github.com/TomasOrtega/claim.git
 cd claim
+uv run python -m claim keygen ~/researcher.key
 ```
 
-Run the following commands from that folder. Keep private files outside it.
-Replace the paths and GitHub username:
+`researcher.key` unlocks your saved work. Keep it in a password manager and a
+separate secure backup. Reuse it for future claims. Never share it; losing every
+copy makes the encrypted work unrecoverable.
+
+## Create a claim
+
+Put all authors' names in your work before saving it. Use a PDF or other file
+under 10 MB. Replace `~/work.pdf` with your file's location and
+`YOUR_GITHUB_USERNAME` with the account you will submit from:
 
 ```sh
-uv run python -m claim keygen ~/researcher.key
-uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author YOUR_GITHUB_USERNAME
-uv run python -m claim disclose ~/my-claim ~/disclosed --key ~/researcher.key
-uv run python -m claim verify ~/disclosed
+uv run python -m claim seal ~/work.pdf ~/my-claim --key ~/researcher.key --author YOUR_GITHUB_USERNAME
 ```
 
-Proofs can be PDFs, Lean source files or ZIP archives. Their bytes are preserved
-unchanged; checking their correctness is the researcher's responsibility.
+In your home folder, find `my-claim/record.json`. Drag it into
+[Submit a claim](https://github.com/TomasOrtega/claim/issues/new?template=submit-claim.yml).
+GitHub uploads the file and inserts a link in the text box.
 
-Generate the key once; reuse it across projects. Store its 44-character ASCII text
-in a password manager and a separate secure backup. Check that the backup can
-decrypt a saved opening. Losing all copies makes encrypted proofs unrecoverable.
+Keep the rest of `my-claim` private and backed up. Choose a new folder name for
+each claim. The registry lists only your GitHub account; coauthors stay in the work.
 
-Use `--author` once, with the GitHub username that will submit the claim.
-Put coauthors in the proof text before sealing; the registry lists only your account.
-Sealing writes `opening.fernet` and `record.json`.
-Back up the encrypted opening too. Only the record can be public before disclosure.
+## Decrypt and publish
 
-Disclosure exports `proof` (original bytes), `salt` (32 raw bytes), and `record.json`.
-The command prints the claim ID and salt for the disclosure form. Never publish the key.
+Whenever you want to make your work public, run this from the `claim` folder:
 
-1. Upload `~/disclosed/proof` to an ordinary public GitHub repository you own.
-   You can rename it, for example to `proof.pdf`, without changing its contents.
-2. Open the file on GitHub and press `y` to get a [permanent link](https://docs.github.com/en/repositories/working-with-files/using-files/getting-permanent-links-to-files).
-3. Fill in [Disclose a claim](https://github.com/TomasOrtega/claim/issues/new?template=disclose-claim.yml)
-   from the same GitHub account, with the claim ID, proof link and salt printed by the command.
+```sh
+uv run python -m claim disclose ~/my-claim ~/disclosed --key ~/researcher.key
+```
 
-The bot downloads the proof, checks the commitment and opens a PR containing only
-the link, salt, proof hash and verification date. The original [claim date](dates.md)
-stays unchanged. Your repository can hold many proofs; keep published files available.
-If using Git to upload them, set `* -text` in `.gitattributes` before adding files
-to preserve line endings. Uploading through GitHub's website also preserves bytes.
+This recovers your original work as `~/disclosed/proof` and prints a **Claim ID**
+and **Salt**. The salt is a code that lets others check your earlier claim.
 
-Corrections need a new issue; editing an issue does not rerun intake.
-Keep the encrypted opening and key backed up yourself.
+1. Create a public [GitHub repository](https://github.com/new) under your account
+   and upload `~/disclosed/proof`. You can rename it, for example to `work.pdf`;
+   keep its contents unchanged.
+2. Open the uploaded file on GitHub, press **y**, and copy the address.
+3. From the same account, open [Disclose a claim](https://github.com/TomasOrtega/claim/issues/new?template=disclose-claim.yml).
+   Paste the address, claim ID and salt into the form.
 
-Claim commands refuse existing output files or directories. An interrupted seal can
-leave a partial directory; only a successful run produces a complete claim.
-Limits: 10 MiB proofs, 14 MiB encrypted openings, 64 KiB records. Files are read
-into memory. Private directories use mode `0700`, files `0600`.
+Your [original claim date](dates.md) stays unchanged. Keep the published file
+available and your private key secret.
