@@ -6,6 +6,7 @@ from zipfile import ZipFile
 
 from claim import archives, lean
 from claim.files import read_limited
+from claim.process import capture
 
 
 def objects(directory: Path) -> bytes:
@@ -21,6 +22,10 @@ def objects(directory: Path) -> bytes:
 
 
 def main(args):
+    if not capture(["lean", "--version"], limit=1024).startswith(
+        b"Lean (version 4.34.0,"
+    ):
+        raise ValueError("container Lean version does not match the pinned toolchain")
     mode, module, theorem = args
     with TemporaryDirectory() as temporary:
         directory = Path(temporary)
