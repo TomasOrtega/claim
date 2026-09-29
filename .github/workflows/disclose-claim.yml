@@ -10,7 +10,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: claim-intake
+  group: claim-intake-${{ github.event.issue.user.login }}
   queue: max
 
 jobs:
