@@ -7,8 +7,8 @@ The aim is to give researchers time to check their work and write a clear
 explanation before publishing, including when they use AI. When you later share
 the original work, others can check that it matches your earlier record.
 
-Your GitHub username and the submission date are public. The work stays private
-until you choose to share it. Each claim has one account responsible for it;
+Your GitHub username and the submission date are public.
+Each claim has one account responsible for it;
 put all authors' names in the work itself before creating the claim.
 
 ## Quickstart
@@ -28,8 +28,7 @@ Your private key unlocks the saved work. Keep it in a password manager and a
 separate secure backup, and back up the saved claim folder too. Never share the
 key: if you lose every copy, the encrypted work cannot be recovered.
 
-The registry does not check whether a work is correct. We trust GitHub and the
-maintainers to record dates honestly. We encourage including a work checked
+We encourage including a work checked
 with Lean, a tool for verifying mathematics.
 
 For technical details, see the [protocol](docs/protocol.md).
