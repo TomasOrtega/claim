@@ -1,26 +1,19 @@
 from io import BytesIO
-from zipfile import ZIP_DEFLATED, ZipFile
 
 import pytest
+from test_disclosure import PROOF_URL
 
 from claim import submissions
 
 URL = "https://github.com/user-attachments/files/123/record.json"
 
 
-def zip_files(contents):
-    stream = BytesIO()
-    with ZipFile(stream, "w", compression=ZIP_DEFLATED) as archive:
-        for name, data in contents.items():
-            archive.writestr(name, data)
-    return stream.getvalue()
+def disclosure_body(claim_id, url, salt):
+    return f"### Claim ID\n\n{claim_id}\n\n### Proof URL\n\n{url}\n\n### Salt\n\n{salt}"
 
 
 def test_attachment():
-    assert (
-        submissions.attachment_url(f"### Record\n\n[record.json]({URL})", ".json")
-        == URL
-    )
+    assert submissions.attachment_url(f"### Record\n\n[record.json]({URL})") == URL
 
 
 @pytest.mark.parametrize(
@@ -37,7 +30,7 @@ def test_attachment():
 )
 def test_reject_download_targets(body):
     with pytest.raises(ValueError, match="attach exactly one"):
-        submissions.attachment_url(body, ".json")
+        submissions.attachment_url(body)
 
 
 def test_download_preserves_record(sealed, tmp_path, monkeypatch):
@@ -45,7 +38,7 @@ def test_download_preserves_record(sealed, tmp_path, monkeypatch):
     monkeypatch.setattr(submissions, "urlopen", lambda *a, **kw: BytesIO(data))
     output = tmp_path / "submission"
     output.mkdir()
-    submissions.download("submit", URL, output)
+    submissions.download(URL, output)
     assert (output / "record.json").read_bytes() == data
     assert list(output.iterdir()) == [output / "record.json"]
 
@@ -54,42 +47,27 @@ def test_oversized_download(tmp_path, monkeypatch):
     monkeypatch.setattr(submissions, "MAX_RECORD_BYTES", 4)
     monkeypatch.setattr(submissions, "urlopen", lambda *a, **kw: BytesIO(b"12345"))
     with pytest.raises(ValueError, match="size limit"):
-        submissions.download("submit", URL, tmp_path)
+        submissions.download(URL, tmp_path)
     assert not list(tmp_path.iterdir())
 
 
-def test_disclosure_zip(disclosed):
-    contents = {p.name: p.read_bytes() for p in disclosed.iterdir()}
-    assert submissions.disclosure_files(zip_files(contents)) == contents
+def test_disclosure_form():
+    claim_id, salt = "b" * 64, "c" * 64
+    request = submissions.disclosure_request(disclosure_body(claim_id, PROOF_URL, salt))
+    assert request == {"claim_id": claim_id, "proof_url": PROOF_URL, "salt": salt}
 
 
 @pytest.mark.parametrize(
-    "extra", ["key", "opening.fernet", "../secret", "nested/proof"]
+    "body",
+    [
+        "",
+        URL,
+        disclosure_body("b" * 63, PROOF_URL, "c" * 64),
+        disclosure_body("b" * 64, PROOF_URL, "c" * 63),
+        disclosure_body("b" * 64, PROOF_URL, "c" * 64) + "\n### Salt\n" + "d" * 64,
+        disclosure_body("b" * 64, PROOF_URL, "c" * 64) + "\n" + URL,
+    ],
 )
-def test_disclosure_rejects_extra_files(disclosed, extra):
-    contents = {p.name: p.read_bytes() for p in disclosed.iterdir()} | {extra: b"extra"}
-    with pytest.raises(ValueError, match="ZIP must contain only"):
-        submissions.disclosure_files(zip_files(contents))
-
-
-@pytest.mark.parametrize("name", ["proof", "salt", "record.json"])
-def test_disclosure_rejects_changed_opening(disclosed, name):
-    contents = {p.name: p.read_bytes() for p in disclosed.iterdir()} | {
-        name: b"changed"
-    }
+def test_invalid_disclosure_form(body):
     with pytest.raises(ValueError):
-        submissions.disclosure_files(zip_files(contents))
-
-
-def test_disclosure_rejects_zip_bomb(disclosed, monkeypatch):
-    monkeypatch.setattr(submissions, "MAX_ARTIFACT_BYTES", 16)
-    contents = {p.name: p.read_bytes() for p in disclosed.iterdir()} | {
-        "proof": bytes(100000)
-    }
-    with pytest.raises(ValueError, match="size limit"):
-        submissions.disclosure_files(zip_files(contents))
-
-
-def test_invalid_zip():
-    with pytest.raises(ValueError, match="invalid disclosure ZIP"):
-        submissions.disclosure_files(b"not a ZIP")
+        submissions.disclosure_request(body)
