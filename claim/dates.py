@@ -65,15 +65,41 @@ def git(root: Path, *args: str) -> bytes:
     return result.stdout
 
 
-def record_push(root: Path, commit: str, recorded_at: str, run_url: str) -> int:
+def record_push(
+    root: Path, commit: str, recorded_at: str, run_url: str, before: str | None = None
+) -> int:
     if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
         raise ValueError("invalid pushed commit")
-    paths = git(root, "ls-tree", "-r", "--name-only", "-z", commit, "--", "claims")
+    if before is not None and re.fullmatch(r"[0-9a-f]{40}", before) is None:
+        raise ValueError("invalid previous commit")
+    if before == "0" * 40:
+        before = git(root, "hash-object", "-t", "tree", "/dev/null").decode().strip()
+    revisions = [before, commit] if before else [commit]
+    paths = git(
+        root,
+        "diff-tree",
+        "--root",
+        "--diff-merges=first-parent",
+        "--no-commit-id",
+        "--no-renames",
+        "--diff-filter=A",
+        "-r",
+        "--name-only",
+        "-z",
+        *revisions,
+        "--",
+        "claims",
+    )
     count = 0
     for path in paths.decode().split("\0"):
         if not path.endswith("/record.json"):
             continue
-        if re.fullmatch(r"claims/[0-9a-f]{64}/record.json", path) is None:
+        if (
+            re.fullmatch(
+                r"claims/([0-9a-f]{2})/([0-9a-f]{2})/\1\2[0-9a-f]{60}/record.json", path
+            )
+            is None
+        ):
             raise ValueError("invalid claim path")
         directory = (root / path).parent
         data = git(root, "show", f"{commit}:{path}")
