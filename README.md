@@ -17,7 +17,8 @@ The library creates commitments, saves encrypted proofs with their salts, and
 builds public records with self-declared author names. Use the [CLI](docs/storage.md)
 to seal, disclose and verify claims, and [timestamp](docs/timestamps.md) public
 records. Operators can [accept claims and export a public registry](docs/registry.md).
-Lean checks are next. See the [protocol](docs/protocol.md).
+Disclosures include verification bundles and event history. Optional [Lean checks](docs/lean.md)
+check a pinned project archive. See the [protocol](docs/protocol.md).
 
 Run Python examples from this checkout with `uv run python`:
 
