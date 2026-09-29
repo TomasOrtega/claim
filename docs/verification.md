@@ -1,27 +1,18 @@
-# Verify a disclosure
+# Check a published claim
 
-From a registry checkout, download a verification bundle:
+The registry checks that published work matches the earlier claim. You can
+repeat that check yourself without the author's private key.
+
+Follow [Set up once](storage.md#set-up-once), skipping the key-generation command.
+From the project folder, run these commands, replacing `CLAIM_ID` with the ID
+shown in the registry:
 
 ```sh
 uv run python -m claim export-bundle . CLAIM_ID ~/bundle
-```
-
-This fetches the author-hosted proof and checks its hash. The bundle includes
-the original record, proof, raw salt and saved dates. Verification then works offline:
-
-```sh
 uv run python -m claim verify ~/bundle
 ```
 
-This checks that the proof and salt match the commitment. If `date.json` is
-present, it also checks that it refers to the same record. The date itself is
-trusted to GitHub and the registry maintainers; the command does not authenticate
-it. See [claim dates](dates.md).
+The first command downloads the work. The second confirms it matches the claim;
+it also works offline. Use a new folder name if `~/bundle` already exists.
 
-The salt in `disclosure.json` is hexadecimal; the bundle's `salt` file contains
-the decoded 32 bytes. `verified_at` records when the proof was checked, not when
-the original claim was submitted. Proof availability depends on its author's repository.
-
-The record names the submitting GitHub user; coauthors are listed in the proof text.
-A matching commitment and recorded date do not establish mathematical correctness
-or independent discovery.
+This checks the saved file, not the mathematics. See [how dates work](dates.md).
