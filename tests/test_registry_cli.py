@@ -1,6 +1,12 @@
 from claim import cli
 
 
+def test_disclosure_command(accepted, disclosed):
+    root, claim_id = accepted
+    assert cli.main(["accept-disclosure", str(root), claim_id, str(disclosed)]) == 0
+    assert (root / "claims" / claim_id / "disclosure" / "proof").exists()
+
+
 def test_add_receipt_command(accepted, receipt):
     root, claim_id = accepted
     receipt.write_bytes(
