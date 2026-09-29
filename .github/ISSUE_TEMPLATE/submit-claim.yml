@@ -1,0 +1,14 @@
+name: Submit a claim
+description: Register a public commitment to a private proof.
+title: "[Claim] "
+body:
+  - type: markdown
+    attributes:
+      value: Attach only `record.json`. Keep your proof, salt, encrypted opening and key private and backed up.
+  - type: textarea
+    id: record
+    attributes:
+      label: Record
+      description: Drag your record.json file here. Attach one file, without changing its contents.
+    validations:
+      required: true
