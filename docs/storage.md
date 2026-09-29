@@ -17,8 +17,8 @@ Repeat `--author` for coauthors. Sealing writes `opening.fernet` and `record.jso
 Back up the encrypted opening too. Only the record can be public before disclosure.
 
 Disclosure exports `proof` (original bytes), `salt` (32 raw bytes), and the unchanged
-`record.json`. Publish these files; never publish the key. Verification needs no key
-and currently checks only the commitment, not a timestamp.
+`record.json`. Publish these files; never publish the key. Verification needs no key.
+The registry keeps the [claim date](dates.md) separately.
 
 Commands refuse existing output files or directories. An interrupted seal can
 leave a partial directory; only a successful run produces a checked claim.

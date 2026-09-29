@@ -1,6 +1,6 @@
 # Protocol v1
 
-A timestamped commitment is evidence that specific bytes existed by a date.
+We trust GitHub and the registry maintainers to record claim dates honestly.
 Correctness, authorship and independent discovery require separate evidence.
 
 ## Commitment
@@ -21,7 +21,11 @@ Opening recomputes `C` and checks for an exact match.
 A UTF-8 JSON record contains `version: 1`, `commitment` and `authors`, a nonempty
 list of distinct, nonblank names. Names are self-declared; there are no accounts
 or identity checks. Reject duplicate JSON keys, extra fields and invalid types.
-Timestamp the exact record bytes to bind the claimed names and commitment.
+The claim ID is SHA-256 of the exact record bytes, including the author names.
+
+CI adds a separate `date.json` containing the record hash, pushed commit, run URL
+and GitHub's workflow creation time in UTC. Existing dates are kept unchanged.
+See [claim dates](dates.md).
 
 ## Encrypted storage
 
@@ -37,9 +41,9 @@ unrecoverable. This is an encryption key, not a signing key or a commitment salt
 
 ## Disclosure
 
-Publish the record, timestamp evidence and status. Keep the artifact,
+Publish the record, date and status. Keep the artifact,
 salt, unsalted artifact hash and theorem metadata private until disclosure.
-Disclose the original artifact and salt alongside the record and timestamp proof.
+Disclose the original artifact and salt alongside the record and date.
 Keep the encryption key private. Revised proofs need new commitments.
 
 ## Status
@@ -47,8 +51,7 @@ Keep the encryption key private. Revised proofs need new commitments.
 Claims start sealed. Append disclosure or withdrawal events without
 changing the original record or removing claims from author counts. Withdrawal
 does not hide an earlier disclosure. Events record operator decisions; they do
-not have independently verified dates.
+not have recorded dates.
 
-Timestamp status is pending, verified or failed. Only independent verification
-establishes the attested date; registry receipt time is separate.
+Undated claims display “Awaiting CI”.
 Label private Lean checks as author-reported until independently checked.

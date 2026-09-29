@@ -23,7 +23,7 @@ until disclosure. Local checks are author-reported, with no public certification
 
 ## After disclosure
 
-First [verify the opening and timestamp](verification.md). Then check the
+First [verify the disclosure](verification.md). Then check the
 disclosed archive on a separate verifier machine, using an image you built:
 
 ```sh

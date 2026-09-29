@@ -4,7 +4,7 @@ Claim registry for mathematics
 Ideally, this repo removes (or dampens) the incentive to publish raw AI-generated proofs immediately, so there is more time to produce a nice exposition.
 
 1. Researchers can privately commit to a theorem/proof without revealing it.
-2. Provide a public (and fixed) timestamped claim proving the result existed by that date.
+2. Record a public claim date through GitHub.
 3. Ideally include a Lean verification.
 4. Reveal only the commitment authors, not their contents, to discourage mass speculative claims.
 5. Allow later disclosure of the proof and salt to establish independent discovery if someone else publishes first.
@@ -21,13 +21,13 @@ git clone https://github.com/TomasOrtega/claim.git
 cd claim
 uv run python -m claim keygen ~/researcher.key
 uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --author "Your Name"
-uv run python -m claim stamp ~/my-claim/record.json ~/record.ots
 ```
 
 Generate the key once and reuse it. Keep it in a password manager and a separate
 secure backup; losing every copy prevents decryption. Back up `~/my-claim` too.
 
-The timestamp starts pending; [verify it after confirmation](docs/timestamps.md).
+Submit `~/my-claim` to the [registry](docs/registry.md). CI records its date after
+the operator pushes it to GitHub; we trust GitHub and the registry maintainers.
 When ready, [publish the proof and salt](docs/storage.md). Never publish the key.
 
 More: [hosting a registry](docs/registry.md), [Lean checks](docs/lean.md),
