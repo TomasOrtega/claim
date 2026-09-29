@@ -48,8 +48,5 @@ def read_disclosure(directory: Path) -> dict[str, bytes]:
 
 
 def verify(directory: Path) -> str:
-    return check_opening(
-        files.read_limited(directory / "record.json", MAX_RECORD_BYTES),
-        files.read_limited(directory / "proof", MAX_ARTIFACT_BYTES),
-        files.read_limited(directory / "salt", 32),
-    )
+    data = read_disclosure(directory)
+    return check_opening(data["record.json"], data["proof"], data["salt"])
