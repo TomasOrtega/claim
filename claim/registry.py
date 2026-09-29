@@ -83,6 +83,12 @@ def disclose(root: Path, claim_id: str, source: Path) -> None:
     events.append(directory, "disclosed")
 
 
+def withdraw(root: Path, claim_id: str) -> None:
+    directory = location(root, claim_id)
+    read_claim(directory)
+    events.append(directory, "withdrawn")
+
+
 def timestamp_status(data: bytes, proofs) -> dict:
     results = []
     for proof in proofs:

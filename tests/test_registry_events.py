@@ -11,6 +11,14 @@ def test_changed_disclosure(accepted, disclosed, name):
     assert events.read(registry.location(*accepted)) == []
 
 
+def test_withdraw_claim(accepted):
+    directory = registry.location(*accepted)
+    original = registry.read_claim(directory)
+    registry.withdraw(*accepted)
+    assert events.read(directory) == ["withdrawn"]
+    assert registry.read_claim(directory) == original
+
+
 def test_disclose_claim(accepted, disclosed):
     root, claim_id = accepted
     original = registry.read_claim(registry.location(root, claim_id))
