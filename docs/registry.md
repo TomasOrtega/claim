@@ -2,8 +2,9 @@
 
 Normal intake uses the **Submit a claim** and **Disclose a claim** issue forms.
 Both open PRs for review. Submission adds only the public record and its date;
-disclosure checks the proof and salt against an existing record. Researchers
-keep their encrypted openings and keys.
+disclosure checks an author-hosted proof and salt against an existing record.
+The registry stores only the proof link, salt, hash and verification date.
+Researchers keep their encrypted openings and keys.
 
 GitHub requires **Settings → Actions → General → Allow GitHub Actions to create
 and approve pull requests**. These workflows create PRs; review and merge stay
@@ -17,13 +18,15 @@ For manual intake, run these commands from the registry checkout:
 
 ```sh
 uv run python -m claim accept . ~/my-claim/record.json
-uv run python -m claim accept-disclosure . CLAIM_ID ~/disclosed
+uv run python -m claim accept-disclosure . CLAIM_ID PROOF_URL SALT
 uv run python -m claim withdraw . CLAIM_ID
 ```
 
 `accept` prints the claim ID, SHA-256 of the exact record bytes. Existing records
 cannot be overwritten. Commit and push manual changes; undated records receive
 a date from the push workflow. Keep `.gitattributes` unchanged to preserve bytes.
+`PROOF_URL` must be a public GitHub file link pinned to a full commit hash.
+`SALT` is the 64-character hexadecimal value printed by `claim disclose`.
 
 Names are self-declared. Check disclosure and withdrawal requests before merging;
 the software does not authenticate the requester. Withdrawal keeps the record,
@@ -35,5 +38,7 @@ uv run python -m claim export-bundle . CLAIM_ID ~/bundle
 ```
 
 Use fresh output directories. Publish the completed site export, including
-`.gitattributes` and `.nojekyll`. Bundles contain the record, proof, salt, date
-if available, and event history. Follow [independent verification](verification.md).
+`.gitattributes` and `.nojekyll`. Site exports link to proofs without downloading them.
+Bundle export downloads and verifies one proof for offline use, alongside the
+record, salt, dates and events. It fails if the proof is unavailable or changed.
+Follow [independent verification](verification.md).

@@ -44,7 +44,10 @@ unrecoverable. This is an encryption key, not a signing key or a commitment salt
 
 Publish the record, date and status. Keep the artifact,
 salt, unsalted artifact hash and theorem metadata private until disclosure.
-Disclose the original artifact and salt alongside the record and date.
+Publish the original artifact in an author-owned public GitHub repository.
+Submit its file URL pinned to a full commit hash and the salt in hexadecimal.
+The registry downloads and checks the artifact, then saves `disclosure.json` with
+`proof_url`, `salt`, `proof_sha256` and `verified_at` (UTC). It stores no proof bytes.
 Keep the encryption key private. Revised proofs need new commitments.
 
 ## Status
