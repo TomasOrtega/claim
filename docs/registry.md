@@ -5,6 +5,10 @@ Both open PRs for review. Submission adds only the public record and its date;
 disclosure checks the proof and salt against an existing record. Researchers
 keep their encrypted openings and keys.
 
+GitHub requires **Settings → Actions → General → Allow GitHub Actions to create
+and approve pull requests**. These workflows create PRs; review and merge stay
+manual.
+
 Review and merge the bot's PR. The date is already recorded, so review delays
 do not delay the claim date. Corrections require a new issue. A failed job can be
 rerun from GitHub Actions without creating a second PR or changing a saved date.
