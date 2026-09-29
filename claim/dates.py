@@ -1,5 +1,6 @@
 import json
 import re
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -53,3 +54,33 @@ def save(
         return False
     files.write_private(directory / "date.json", json.dumps(value).encode() + b"\n")
     return True
+
+
+def git(root: Path, *args: str) -> bytes:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args], capture_output=True, timeout=30, check=False
+    )
+    if result.returncode:
+        raise ValueError("could not read pushed commit")
+    return result.stdout
+
+
+def record_push(root: Path, commit: str, recorded_at: str, run_url: str) -> int:
+    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise ValueError("invalid pushed commit")
+    paths = git(root, "ls-tree", "-r", "--name-only", "-z", commit, "--", "claims")
+    count = 0
+    for path in paths.decode().split("\0"):
+        if not path.endswith("/record.json"):
+            continue
+        if re.fullmatch(r"claims/[0-9a-f]{64}/record.json", path) is None:
+            raise ValueError("invalid claim path")
+        directory = (root / path).parent
+        data = git(root, "show", f"{commit}:{path}")
+        if (
+            record.record_id(data) != directory.name
+            or record.read_record(directory / "record.json") != data
+        ):
+            raise ValueError("pushed record does not match registry")
+        count += save(directory, data, recorded_at, commit, run_url)
+    return count

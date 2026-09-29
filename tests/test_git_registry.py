@@ -25,7 +25,7 @@ def test_git_restore(accepted, tmp_path, key):
 
 
 def git(path, *args):
-    subprocess.run(
+    return subprocess.run(
         [
             "git",
             "-c",
