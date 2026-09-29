@@ -1,5 +1,6 @@
 from io import BytesIO
 from pathlib import Path, PurePosixPath
+from stat import S_IFDIR, S_IFMT, S_IFREG
 from zipfile import BadZipFile, ZipFile
 
 from claim.files import write_private
@@ -14,6 +15,9 @@ def unpack(data: bytes, directory: Path) -> None:
             if len(entries) > 20000 or sum(e.file_size for e in entries) > MAX_EXPANDED:
                 raise ValueError("archive exceeds size limit")
             for entry in entries:
+                kind = S_IFMT(entry.external_attr >> 16)
+                if kind not in (0, S_IFREG, S_IFDIR) or entry.flag_bits & 1:
+                    raise ValueError("unsupported archive entry")
                 parts = PurePosixPath(entry.filename)
                 if parts.is_absolute() or ".." in parts.parts or ":" in entry.filename:
                     raise ValueError("unsafe archive path")

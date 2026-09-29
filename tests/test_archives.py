@@ -1,5 +1,5 @@
 from io import BytesIO
-from zipfile import ZipFile
+from zipfile import ZipFile, ZipInfo
 
 import pytest
 
@@ -23,3 +23,12 @@ def test_unpack_archive(tmp_path):
         archive.writestr("Proof.lean", "theorem result : True := True.intro")
     unpack(stream.getvalue(), tmp_path)
     assert (tmp_path / "Proof.lean").read_text().startswith("theorem")
+
+
+def test_archive_symlink(tmp_path):
+    stream, link = BytesIO(), ZipInfo("link")
+    link.external_attr = 0o120777 << 16
+    with ZipFile(stream, "w") as archive:
+        archive.writestr(link, "../secret")
+    with pytest.raises(ValueError, match="unsupported archive entry"):
+        unpack(stream.getvalue(), tmp_path)
