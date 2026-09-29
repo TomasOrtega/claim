@@ -37,3 +37,19 @@ def disclosed(sealed, tmp_path, key):
     output = tmp_path / "disclosed"
     disclose(sealed, output, key)
     return output
+
+
+@pytest.fixture
+def published(disclosed, monkeypatch):
+    from test_disclosure import PROOF_URL, RAW_URL
+    from io import BytesIO
+
+    from claim import disclosure
+
+    class Opener:
+        def open(self, url, timeout):
+            assert url == RAW_URL and timeout == 30
+            return BytesIO((disclosed / "proof").read_bytes())
+
+    monkeypatch.setattr(disclosure, "build_opener", lambda *_: Opener())
+    return PROOF_URL, (disclosed / "salt").read_bytes().hex()
