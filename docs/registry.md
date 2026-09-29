@@ -6,6 +6,9 @@ disclosure checks an author-hosted proof and salt against an existing record.
 The registry stores only the proof link, salt, hash and verification date.
 Researchers keep their encrypted openings and keys.
 
+Each record lists one GitHub user. Both workflows require that account to open
+the issue that creates the PR. Coauthors are listed in the proof text before sealing.
+
 GitHub requires **Settings → Actions → General → Allow GitHub Actions to create
 and approve pull requests**. These workflows create PRs; review and merge stay
 manual.
@@ -28,9 +31,9 @@ a date from the push workflow. Keep `.gitattributes` unchanged to preserve bytes
 `PROOF_URL` must be a public GitHub file link pinned to a full commit hash.
 `SALT` is the 64-character hexadecimal value printed by `claim disclose`.
 
-Names are self-declared. Check disclosure and withdrawal requests before merging;
-the software does not authenticate the requester. Withdrawal keeps the record,
-earlier disclosures and author counts.
+For manual PRs, check that the record's username matches the person opening the PR.
+Check withdrawal requests against the same account. Withdrawal keeps the record,
+earlier disclosures and counts per GitHub user.
 
 ```sh
 uv run python -m claim export-index . ~/public-export

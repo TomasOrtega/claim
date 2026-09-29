@@ -18,10 +18,13 @@ Opening recomputes `C` and checks for an exact match.
 
 ## Public records
 
-A UTF-8 JSON record contains `version: 1`, `commitment` and `authors`, a nonempty
-list of distinct, nonblank names. Names are self-declared; there are no accounts
-or identity checks. Reject duplicate JSON keys, extra fields and invalid types.
-The claim ID is SHA-256 of the exact record bytes, including the author names.
+A UTF-8 JSON record contains `version: 1`, `commitment` and `authors`, a list
+containing exactly one GitHub username. The submission and disclosure workflows
+check that it matches the account opening the issue, ignoring letter case.
+The bot opens the PR on that user's behalf. Coauthors belong in the proof text
+before sealing, not in the registry record.
+Reject duplicate JSON keys, extra fields and invalid types.
+The claim ID is SHA-256 of the exact record bytes, including the username.
 
 The submission PR includes `date.json`: the record hash, record commit, run URL
 and GitHub's workflow creation time in UTC. Merging preserves that date.

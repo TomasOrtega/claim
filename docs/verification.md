@@ -22,6 +22,6 @@ The salt in `disclosure.json` is hexadecimal; the bundle's `salt` file contains
 the decoded 32 bytes. `verified_at` records when the proof was checked, not when
 the original claim was submitted. Proof availability depends on its author's repository.
 
-Read the original `record.json` for the claimed author names. Names and operator
-events are not identity checks. A matching commitment and recorded date do not
-establish mathematical correctness or independent discovery.
+The record names the submitting GitHub user; coauthors are listed in the proof text.
+A matching commitment and recorded date do not establish mathematical correctness
+or independent discovery.
