@@ -8,6 +8,8 @@ Researchers keep their encrypted openings and keys.
 
 Each record lists one GitHub user. Both workflows require that account to open
 the issue that creates the PR. Coauthors are listed in the proof text before sealing.
+Requests from different GitHub users run concurrently; each user's requests are
+queued together to prevent duplicate submissions from racing.
 
 GitHub requires **Settings → Actions → General → Allow GitHub Actions to create
 and approve pull requests**. These workflows create PRs; review and merge stay
@@ -16,6 +18,7 @@ manual.
 Review and merge the bot's PR. The date is already recorded, so review delays
 do not delay the claim date. Corrections require a new issue. A failed job can be
 rerun from GitHub Actions without creating a second PR or changing a saved date.
+Merged PR branches are deleted automatically by the repository setting.
 
 For manual intake, run these commands from the registry checkout:
 
@@ -28,6 +31,8 @@ uv run python -m claim withdraw . CLAIM_ID
 `accept` prints the claim ID, SHA-256 of the exact record bytes. Existing records
 cannot be overwritten. Commit and push manual changes; undated records receive
 a date from the push workflow. Keep `.gitattributes` unchanged to preserve bytes.
+Registry files and site exports use `claims/ab/cd/ID/`, with two prefixes from
+the claim ID, so directories stay small as the registry grows.
 `PROOF_URL` must be a public GitHub file link pinned to a full commit hash.
 `SALT` is the 64-character hexadecimal value printed by `claim disclose`.
 
