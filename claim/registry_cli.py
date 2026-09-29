@@ -12,18 +12,13 @@ def add_commands(commands) -> None:
         date.add_argument(argument)
     date.set_defaults(run=run)
     command = commands.add_parser("accept", help="accept an encrypted claim")
-    for argument in ("registry", "source", "receipt"):
+    for argument in ("registry", "source"):
         command.add_argument(argument, type=Path)
     command.set_defaults(run=run)
     export = commands.add_parser("export-index", help="export a public registry site")
     export.add_argument("registry", type=Path)
     export.add_argument("output", type=Path)
     export.set_defaults(run=run)
-    receipt = commands.add_parser("add-receipt", help="append timestamp evidence")
-    receipt.add_argument("registry", type=Path)
-    receipt.add_argument("claim_id")
-    receipt.add_argument("receipt", type=Path)
-    receipt.set_defaults(run=run)
     disclosure = commands.add_parser(
         "accept-disclosure", help="record a checked disclosure"
     )
@@ -44,9 +39,7 @@ def run(args) -> int:
     if args.command == "date-claims":
         print(dates.record_push(args.registry, args.commit, args.date, args.run_url))
     elif args.command == "accept":
-        print(registry.accept(args.registry, args.source, args.receipt))
-    elif args.command == "add-receipt":
-        registry.add_receipt(args.registry, args.claim_id, args.receipt)
+        print(registry.accept(args.registry, args.source))
     elif args.command == "accept-disclosure":
         registry.disclose(args.registry, args.claim_id, args.source)
     elif args.command == "withdraw":

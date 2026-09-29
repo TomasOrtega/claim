@@ -15,7 +15,7 @@ def test_help():
     result = run("--help")
     assert result.returncode == 0
     assert "usage:" in result.stdout
-    assert "verify-time" in result.stdout
+    assert "date-claims" in result.stdout
 
 
 def test_changed_proof(sealed, tmp_path, key_file):
@@ -75,7 +75,7 @@ def test_verify(sealed, tmp_path, key_file):
     key_file.unlink()
     result = run("verify", output)
     assert result.returncode == 0
-    assert "timestamp not checked" in result.stdout
+    assert "Opening matches." in result.stdout
 
 
 def test_seal(tmp_path, key_file):

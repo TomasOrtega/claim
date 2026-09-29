@@ -60,7 +60,6 @@ def test_verification_bundle(accepted, disclosed, tmp_path):
     registry.disclose(*accepted, disclosed)
     registry.bundle(*accepted, tmp_path / "bundle")
     assert workflow.verify(tmp_path / "bundle") == workflow.verify(disclosed)
-    assert list((tmp_path / "bundle").glob("*.ots"))
     assert not (tmp_path / "bundle" / "opening.fernet").exists()
 
 

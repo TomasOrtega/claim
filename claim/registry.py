@@ -1,13 +1,10 @@
 import json
 import re
 from collections import Counter
-from hashlib import sha256
 from pathlib import Path
 
-from bitcoin.rpc import JSONRPCError
-
-from claim import encryption, events, files, record, site, timestamp, workflow
-from claim.limits import MAX_OPENING_BYTES, MAX_TIMESTAMP_BYTES
+from claim import dates, encryption, events, files, record, site, workflow
+from claim.limits import MAX_OPENING_BYTES
 
 
 def location(root: Path, claim_id: str) -> Path:
@@ -40,32 +37,6 @@ def read_claim(directory: Path) -> bytes:
     return data
 
 
-def read_receipts(directory: Path, data: bytes) -> dict[str, bytes]:
-    proofs = {}
-    for path in sorted((directory / "timestamps").iterdir()):
-        proof = files.read_limited(path, MAX_TIMESTAMP_BYTES)
-        if path.name != sha256(proof).hexdigest() + ".ots":
-            raise ValueError("timestamp receipt ID mismatch")
-        timestamp.parse_receipt(data, proof)
-        proofs[path.name] = proof
-    if not proofs:
-        raise ValueError("missing timestamp receipt")
-    return proofs
-
-
-def save_receipt(directory: Path, data: bytes, proof: bytes) -> None:
-    timestamp.parse_receipt(data, proof)
-    receipts = directory / "timestamps"
-    receipts.mkdir(mode=0o700, exist_ok=True)
-    files.write_private(receipts / (sha256(proof).hexdigest() + ".ots"), proof)
-
-
-def add_receipt(root: Path, claim_id: str, proof_path: Path) -> None:
-    directory = location(root, claim_id)
-    data = read_claim(directory)
-    save_receipt(directory, data, files.read_limited(proof_path, MAX_TIMESTAMP_BYTES))
-
-
 def disclose(root: Path, claim_id: str, source: Path) -> None:
     directory = location(root, claim_id)
     original = read_claim(directory)
@@ -89,22 +60,9 @@ def withdraw(root: Path, claim_id: str) -> None:
     events.append(directory, "withdrawn")
 
 
-def timestamp_status(data: bytes, proofs) -> dict:
-    results = []
-    for proof in proofs:
-        try:
-            results.append(timestamp.verify(data, proof))
-        except (OSError, ValueError, JSONRPCError):
-            results.append({"status": "failed"})
-    verified = [r for r in results if r["status"] == "verified"]
-    if verified:
-        return min(verified, key=lambda r: r["unix_time"])
-    return {"status": "pending" if {"status": "pending"} in results else "failed"}
-
-
 def export_claim(directory: Path, output: Path) -> dict:
     data = read_claim(directory)
-    proofs = read_receipts(directory, data)
+    date = dates.read(directory, data)
     history = events.read(directory)
     disclosure = (
         workflow.read_disclosure(directory / "disclosure")
@@ -119,13 +77,12 @@ def export_claim(directory: Path, output: Path) -> dict:
         "id": directory.name,
         "status": events.status(history),
         "events": history,
-        "timestamp": timestamp_status(data, proofs.values()),
-        "receipts": list(proofs),
+        "date": date,
     }
     files.create_private_directory(output)
     files.write_private(output / "record.json", data)
-    for name, proof in proofs.items():
-        files.write_private(output / name, proof)
+    if date is not None:
+        files.write_private(output / "date.json", json.dumps(date).encode() + b"\n")
     for event in history:
         events.append(output, event)
     for name in ("proof", "salt") if disclosure else ():
@@ -160,11 +117,9 @@ def export(root: Path, output: Path) -> None:
     )
 
 
-def accept(root: Path, source: Path, receipt: Path) -> str:
+def accept(root: Path, source: Path) -> str:
     files.require_external(root)
     data, token = read_submission(source)
-    proof = files.read_limited(receipt, MAX_TIMESTAMP_BYTES)
-    timestamp.parse_receipt(data, proof)
     claim_id = record.record_id(data)
     directory = location(root, claim_id)
     root.mkdir(mode=0o700, exist_ok=True)
@@ -172,6 +127,5 @@ def accept(root: Path, source: Path, receipt: Path) -> str:
     directory.parent.mkdir(mode=0o700, exist_ok=True)
     files.create_private_directory(directory)
     files.write_private(directory / "opening.fernet", token)
-    save_receipt(directory, data, proof)
     files.write_private(directory / "record.json", data)
     return claim_id

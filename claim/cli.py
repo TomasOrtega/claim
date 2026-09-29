@@ -2,10 +2,9 @@ import argparse
 from pathlib import Path
 from subprocess import TimeoutExpired
 
-from bitcoin.rpc import JSONRPCError
 from cryptography.fernet import InvalidToken
 
-from claim import lean_cli, registry_cli, timestamp_cli, workflow
+from claim import lean_cli, registry_cli, workflow
 from claim.keys import load_key, save_key
 
 
@@ -25,7 +24,6 @@ def main(argv=None) -> int:
     disclose.add_argument("--key", type=Path, required=True)
     verify = commands.add_parser("verify", help="verify a disclosed opening")
     verify.add_argument("directory", type=Path)
-    timestamp_cli.add_commands(commands)
     registry_cli.add_commands(commands)
     lean_cli.add_commands(commands)
     args = parser.parse_args(argv)
@@ -43,11 +41,11 @@ def main(argv=None) -> int:
             workflow.disclose(args.directory, args.output, load_key(args.key))
         elif args.command == "verify":
             workflow.verify(args.directory)
-            print("Opening matches; timestamp not checked.")
+            print("Opening matches.")
         else:
             return args.run(args)
     except InvalidToken:
         parser.exit(1, "claim: invalid key or encrypted opening\n")
-    except (OSError, ValueError, TimeoutExpired, JSONRPCError) as exc:
+    except (OSError, ValueError, TimeoutExpired) as exc:
         parser.exit(1, f"claim: {exc}\n")
     return 0
