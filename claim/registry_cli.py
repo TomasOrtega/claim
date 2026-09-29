@@ -24,6 +24,13 @@ def add_commands(commands) -> None:
     disclosure.add_argument("claim_id")
     disclosure.add_argument("source", type=Path)
     disclosure.set_defaults(run=run)
+    for name in ("withdraw", "export-bundle"):
+        command = commands.add_parser(name)
+        command.add_argument("registry", type=Path)
+        command.add_argument("claim_id")
+        if name == "export-bundle":
+            command.add_argument("output", type=Path)
+        command.set_defaults(run=run)
 
 
 def run(args) -> int:
@@ -33,6 +40,10 @@ def run(args) -> int:
         registry.add_receipt(args.registry, args.claim_id, args.receipt)
     elif args.command == "accept-disclosure":
         registry.disclose(args.registry, args.claim_id, args.source)
+    elif args.command == "withdraw":
+        registry.withdraw(args.registry, args.claim_id)
+    elif args.command == "export-bundle":
+        registry.bundle(args.registry, args.claim_id, args.output)
     else:
         registry.export(args.registry, args.output)
     return 0
