@@ -16,7 +16,7 @@ def built_project(lean_project):
         'name = "Proof"\n[[lean_lib]]\nname = "Proof"\n'
     )
     (lean_project / "Proof.lean").write_text(
-        "theorem result : 1 + 1 = 2 := rfl\naxiom falsehood : False\ntheorem bad : False := falsehood\n"
+        "theorem result : 1 + 1 = 2 := rfl\naxiom falsehood : False\ntheorem bad : False := falsehood\nset_option warn.sorry false in\ntheorem incomplete : False := by sorry\n"
     )
     build(lean_project, "Proof", [shutil.which("elan"), "run", TOOLCHAIN])
     return lean_project
@@ -29,7 +29,7 @@ def test_real_lean(built_project):
     assert "Eq" in statement and "2" in statement
 
 
-@pytest.mark.parametrize("theorem", ["bad", "falsehood", "missing"])
+@pytest.mark.parametrize("theorem", ["bad", "falsehood", "missing", "incomplete"])
 def test_real_lean_rejects(built_project, theorem):
     with pytest.raises(ValueError, match="failed"):
         check_build(built_project, "Proof", theorem, ["elan", "run", TOOLCHAIN])
