@@ -41,8 +41,9 @@ def disclosed(sealed, tmp_path, key):
 
 @pytest.fixture
 def published(disclosed, monkeypatch):
-    from test_disclosure import PROOF_URL, RAW_URL
     from io import BytesIO
+
+    from test_disclosure import PROOF_URL, RAW_URL
 
     from claim import disclosure
 

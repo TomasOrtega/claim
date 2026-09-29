@@ -62,7 +62,7 @@ def validate(value: dict, data: bytes) -> None:
     digest = commitment.commit_digest(bytes.fromhex(value["proof_sha256"]), salt)
     if digest != record.load_record(data)["commitment"]:
         raise ValueError("disclosure does not match record")
-    datetime.strptime(value["verified_at"], "%Y-%m-%dT%H:%M:%SZ")
+    datetime.strptime(value["verified_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
 
 
 def check(data: bytes, url: str, salt: str) -> dict:

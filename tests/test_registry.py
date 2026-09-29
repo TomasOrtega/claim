@@ -57,6 +57,7 @@ def test_export_allowlist(accepted, tmp_path, key):
         "status",
         "date",
         "events",
+        "disclosure",
     }
     assert not (tmp_path / "public" / "private-key").exists()
 
