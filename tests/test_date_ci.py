@@ -50,3 +50,16 @@ def test_date_command(pushed, capsys):
     root, _, commit = pushed
     assert cli.main(["date-claims", str(root), commit, DATE, RUN]) == 0
     assert capsys.readouterr().out.strip() == "1"
+
+
+def test_disclosure_preserves_claim_date(pushed, disclosed):
+    root, claim_id, commit = pushed
+    dates.record_push(root, commit, DATE, RUN)
+    path = registry.location(root, claim_id) / "date.json"
+    original = path.read_bytes()
+    registry.disclose(root, claim_id, disclosed)
+    git(root, "add", ".")
+    git(root, "commit", "-m", "disclose claim")
+    commit = git(root, "rev-parse", "HEAD").stdout.decode().strip()
+    assert dates.record_push(root, commit, "2026-10-01T00:00:00Z", RUN) == 0
+    assert path.read_bytes() == original

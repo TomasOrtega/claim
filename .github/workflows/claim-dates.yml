@@ -2,7 +2,7 @@ name: Claim dates
 on:
   push:
     branches: [main]
-    paths: ['claims/**/record.json', '.github/workflows/claim-dates.yml']
+    paths: ['claims/*/record.json', '.github/workflows/claim-dates.yml']
   workflow_dispatch:
 
 permissions:

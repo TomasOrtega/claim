@@ -71,7 +71,9 @@ def record_push(root: Path, commit: str, recorded_at: str, run_url: str) -> int:
     paths = git(root, "ls-tree", "-r", "--name-only", "-z", commit, "--", "claims")
     count = 0
     for path in paths.decode().split("\0"):
-        if not path.endswith("/record.json"):
+        if not path.endswith("/record.json") or path.endswith(
+            "/disclosure/record.json"
+        ):
             continue
         if re.fullmatch(r"claims/[0-9a-f]{64}/record.json", path) is None:
             raise ValueError("invalid claim path")
