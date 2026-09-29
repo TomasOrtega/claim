@@ -33,3 +33,12 @@ def test_real_lean(built_project):
 def test_real_lean_rejects(built_project, theorem):
     with pytest.raises(ValueError, match="failed"):
         check_build(built_project, "Proof", theorem, ["elan", "run", TOOLCHAIN])
+
+
+def test_invalid_lean_proof(lean_project):
+    (lean_project / "lakefile.toml").write_text(
+        'name = "Proof"\n[[lean_lib]]\nname = "Proof"\n'
+    )
+    (lean_project / "Proof.lean").write_text("theorem wrong : 1 = 2 := rfl\n")
+    with pytest.raises(ValueError, match="failed"):
+        build(lean_project, "Proof", ["elan", "run", TOOLCHAIN])
