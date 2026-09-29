@@ -23,12 +23,13 @@ list of distinct, nonblank names. Names are self-declared; there are no accounts
 or identity checks. Reject duplicate JSON keys, extra fields and invalid types.
 The claim ID is SHA-256 of the exact record bytes, including the author names.
 
-CI adds a separate `date.json` containing the record hash, pushed commit, run URL
-and GitHub's workflow creation time in UTC. Existing dates are kept unchanged.
+The submission PR includes `date.json`: the record hash, record commit, run URL
+and GitHub's workflow creation time in UTC. Merging preserves that date.
 See [claim dates](dates.md).
 
 ## Encrypted storage
 
+Researchers keep their encrypted files and keys; only records go to the registry.
 One researcher key can encrypt many projects. Use Fernet from `cryptography` to
 encrypt `b"claim:opening:v1\0" || S || A`. Its library supplies fresh randomness
 and checks authentication before decryption. The format exposes ciphertext length

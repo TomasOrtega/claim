@@ -27,8 +27,9 @@ uv run python -m claim seal ~/proof.pdf ~/my-claim --key ~/researcher.key --auth
 Generate the key once and reuse it. Keep it in a password manager and a separate
 secure backup; losing every copy prevents decryption. Back up `~/my-claim` too.
 
-Submit `~/my-claim` to the registry maintainers. CI records its date after
-the operator pushes it to GitHub; we trust GitHub and the registry maintainers.
+Upload only `~/my-claim/record.json` using [Submit a claim](https://github.com/TomasOrtega/claim/issues/new?template=submit-claim.yml).
+A bot opens a PR with the claim and its date, before maintainer review.
+We trust GitHub and the registry maintainers to record dates honestly.
 When ready, [publish the proof and salt](docs/storage.md). Never publish the key.
 
 See the [protocol](docs/protocol.md).

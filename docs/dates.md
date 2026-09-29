@@ -1,12 +1,17 @@
 # Claim dates
 
-We trust GitHub and the registry maintainers. After a push to `main`, CI adds
-`claims/ID/date.json` with the record's SHA-256 hash, pushed commit, run URL and
-the workflow's creation time in UTC. It never changes an existing date.
+We trust GitHub and the registry maintainers. The submission workflow adds
+`claims/ID/date.json` in the PR, before review. It contains the exact record's
+SHA-256 hash, a commit containing that record, the run URL and GitHub's workflow
+creation time in UTC.
 
-This records when GitHub created the workflow run, not the exact push time.
-Commit author dates are not used. If a run fails, rerun it from GitHub Actions.
+Merging or disclosing a claim preserves its date. Reruns reuse an existing PR or
+branch. A changed record needs a new submission and date. Issue edits are not
+processed; the workflow uses the attachment from the original issue event.
 
-Pull the CI commit before exporting the public site. Exports include `date.json`;
-undated claims show “Awaiting CI”. Run links in a private registry require access
-to that repository. The public date relies on the maintainers' honesty.
+The date is the workflow's creation time, not a commit's author date or the time
+of maintainer approval. Claims added manually without a date get one from the
+push workflow. Undated claims display “Awaiting CI”.
+
+Exports include `date.json`. If a workflow fails, open its run in GitHub Actions
+and rerun it. The failure comment on the issue links to the run.
