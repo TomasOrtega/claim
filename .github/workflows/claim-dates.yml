@@ -2,7 +2,7 @@ name: Claim dates
 on:
   push:
     branches: [main]
-    paths: ['claims/*/record.json', '.github/workflows/claim-dates.yml']
+    paths: ['claims/*/*/*/record.json', '.github/workflows/claim-dates.yml']
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,6 @@ jobs:
         with:
           ref: main
           path: registry
-          fetch-depth: 0
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: TomasOrtega/claim
@@ -35,14 +34,19 @@ jobs:
       - name: Record new claim dates
         env:
           GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
         run: |
+          git -C registry fetch --no-tags --depth=2 origin "$GITHUB_SHA"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != 0000000000000000000000000000000000000000 ]; then
+            git -C registry fetch --no-tags --depth=1 origin "$BEFORE"
+          fi
           claim_date=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at)
           run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          changed=$(uv run --directory tooling --locked python -m claim date-claims "$GITHUB_WORKSPACE/registry" "$GITHUB_SHA" "$claim_date" "$run_url")
+          changed=$(uv run --directory tooling --locked python -m claim date-claims "$GITHUB_WORKSPACE/registry" "$GITHUB_SHA" "$claim_date" "$run_url" --before "$BEFORE")
           if [ "$changed" = 0 ]; then exit 0; fi
           git -C registry config user.name 'github-actions[bot]'
           git -C registry config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git -C registry add -- ':(glob)claims/*/date.json'
+          git -C registry add -- ':(glob)claims/*/*/*/date.json'
           git -C registry commit -m 'chore: record claim dates'
           git -C registry pull --rebase origin main
           git -C registry push origin HEAD:main

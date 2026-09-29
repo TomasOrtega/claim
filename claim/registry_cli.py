@@ -10,6 +10,7 @@ def add_commands(commands) -> None:
     date.add_argument("registry", type=Path)
     for argument in ("commit", "date", "run_url"):
         date.add_argument(argument)
+    date.add_argument("--before", help="commit before the push")
     date.set_defaults(run=run)
     command = commands.add_parser("accept", help="accept a public record.json")
     for argument in ("registry", "source"):
@@ -38,7 +39,15 @@ def add_commands(commands) -> None:
 
 def run(args) -> int:
     if args.command == "date-claims":
-        print(dates.record_push(args.registry, args.commit, args.date, args.run_url))
+        print(
+            dates.record_push(
+                args.registry,
+                args.commit,
+                args.date,
+                args.run_url,
+                before=args.before or None,
+            )
+        )
     elif args.command == "accept":
         print(registry.accept(args.registry, args.source))
     elif args.command == "accept-disclosure":
