@@ -1,4 +1,5 @@
 from test_dates import DATE, RUN
+from test_disclosure import PROOF_URL
 
 from claim import site
 
@@ -15,9 +16,12 @@ def test_disclosure_links():
         "status": "withdrawn",
         "date": None,
         "events": ["disclosed", "withdrawn"],
+        "disclosure": {"proof_url": PROOF_URL},
     }
     html = site.claim_row(entry)
-    assert '/proof"' in html and '/salt"' in html and "events/0002.json" in html
+    assert (
+        PROOF_URL in html and '/disclosure.json"' in html and "events/0002.json" in html
+    )
 
 
 def test_author_escaping():

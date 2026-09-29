@@ -10,7 +10,8 @@ def claim_row(entry: dict) -> str:
         date = escape(entry["date"]["recorded_at"])
         evidence = f'<a href="./{claim_id}/date.json">date</a> <a href="{escape(entry["date"]["run_url"])}">CI run</a>'
     if "disclosed" in entry.get("events", []):
-        evidence += f' <a href="./{claim_id}/proof">proof</a> <a href="./{claim_id}/salt">salt</a>'
+        proof_url = escape(entry["disclosure"]["proof_url"])
+        evidence += f' <a href="{proof_url}">proof</a> <a href="./{claim_id}/disclosure.json">disclosure</a>'
     evidence += " ".join(
         f' <a href="./{claim_id}/events/{i:04d}.json">{escape(event)}</a>'
         for i, event in enumerate(entry.get("events", []), 1)
