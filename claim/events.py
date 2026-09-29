@@ -8,6 +8,12 @@ _EVENTS = {
 }
 
 
+def status(history: list[str]) -> str:
+    if "withdrawn" in history:
+        return "withdrawn"
+    return "disclosed" if "disclosed" in history else "sealed"
+
+
 def read(directory: Path) -> list[str]:
     path = directory / "events"
     if not path.exists():

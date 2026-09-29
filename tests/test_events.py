@@ -7,6 +7,18 @@ def test_no_events(tmp_path):
     assert events.read(tmp_path) == []
 
 
+@pytest.mark.parametrize(
+    "history,status",
+    [
+        ([], "sealed"),
+        (["disclosed"], "disclosed"),
+        (["withdrawn", "disclosed"], "withdrawn"),
+    ],
+)
+def test_status(history, status):
+    assert events.status(history) == status
+
+
 def test_duplicate_event(tmp_path):
     events.append(tmp_path, "withdrawn")
     with pytest.raises(ValueError, match="duplicate"):
