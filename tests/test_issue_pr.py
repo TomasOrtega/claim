@@ -37,7 +37,12 @@ def automation(tmp_path, monkeypatch):
             return DATE if args[1].endswith("/123") else LATER
         branch = args[args.index("--head") + 1]
         if args[:2] == ("pr", "list"):
-            return state["prs"].get(branch, "")
+            own = state["prs"].get(branch)
+            foreign = state.get("foreign_pr")
+            return json.dumps(
+                ([{"url": foreign, "isCrossRepository": True}] if foreign else [])
+                + ([{"url": own, "isCrossRepository": False}] if own else [])
+            )
         assert args[:2] == ("pr", "create")
         assert args[args.index("--base") + 1] == "main"
         assert git(root, "ls-remote", "--heads", "origin", branch).stdout
@@ -122,6 +127,14 @@ def test_rerun_keeps_date_and_pr(automation, sealed):
     git(root, "switch", "main")
     assert issue_pr.process("submit", event(URL, 3), REPO, "124") == url
     assert git(root, "rev-parse", branch).stdout == head
+    assert len(state["prs"]) == 1
+
+
+def test_fork_pr_does_not_replace_bot_pr(automation, sealed):
+    _, state = automation
+    state["uploads"][URL] = (sealed / "record.json").read_bytes()
+    state["foreign_pr"] = f"https://github.com/{REPO}/pull/999"
+    assert issue_pr.process("submit", event(URL), REPO, "123").endswith("/pull/1")
     assert len(state["prs"]) == 1
 
 

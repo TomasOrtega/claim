@@ -88,12 +88,11 @@ def process(kind: str, event: dict, repo: str, run_id: str) -> str:
             "--state",
             "all",
             "--json",
-            "url",
-            "--jq",
-            ".[0].url // empty",
+            "url,isCrossRepository",
         )
-        if existing:
-            return existing
+        for pull in json.loads(existing):
+            if not pull["isCrossRepository"]:
+                return pull["url"]
         if git("ls-remote", "--heads", "origin", f"refs/heads/{branch}"):
             git("fetch", "origin", f"refs/heads/{branch}")
             git("switch", "--detach", "FETCH_HEAD")
