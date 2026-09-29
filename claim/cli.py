@@ -4,7 +4,7 @@ from subprocess import TimeoutExpired
 
 from cryptography.fernet import InvalidToken
 
-from claim import registry_cli, workflow
+from claim import record, registry_cli, workflow
 from claim.keys import load_key, save_key
 
 
@@ -38,6 +38,9 @@ def main(argv=None) -> int:
             )
         elif args.command == "disclose":
             workflow.disclose(args.directory, args.output, load_key(args.key))
+            data = record.read_record(args.output / "record.json")
+            print(f"Claim ID: {record.record_id(data)}")
+            print(f"Salt: {(args.output / 'salt').read_bytes().hex()}")
         elif args.command == "verify":
             workflow.verify(args.directory)
             print("Opening matches.")

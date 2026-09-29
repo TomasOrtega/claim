@@ -1,6 +1,8 @@
 import subprocess
 import sys
 
+from claim import record
+
 
 def run(*args):
     return subprocess.run(
@@ -67,6 +69,10 @@ def test_disclose(sealed, tmp_path, key_file):
     result = run("disclose", sealed, output, "--key", key_file)
     assert result.returncode == 0
     assert (output / "proof").read_bytes() == b"proof\r\n\xff"
+    claim_id = record.record_id((output / "record.json").read_bytes())
+    assert f"Claim ID: {claim_id}" in result.stdout
+    assert f"Salt: {(output / 'salt').read_bytes().hex()}" in result.stdout
+    assert key_file.read_text() not in result.stdout
 
 
 def test_verify(sealed, tmp_path, key_file):
