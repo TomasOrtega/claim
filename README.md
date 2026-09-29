@@ -8,7 +8,7 @@ Ideally, this repo removes (or dampens) the incentive to publish raw AI-generate
 3. Reveal only the commitment authors, not their contents, to discourage mass speculative claims.
 4. Allow later disclosure of the proof and salt to establish independent discovery if someone else publishes first.
 
-Researchers are responsible for checking their proofs.
+We suggest researchers add a Lean verification to their claims.
 
 This project is inspired by Gonzalo Cao-Labora's tweets: https://x.com/GonZalocla/status/2104615564291563591.
 
