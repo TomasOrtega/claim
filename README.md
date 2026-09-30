@@ -5,10 +5,11 @@ Inspired by [Gonzalo Cao-Labora's posts](https://x.com/GonZalocla/status/2104615
 
 Further comments by [Ricardo Perez-Marco](https://x.com/rperezmarco/status/2105052248430501898) pointed out that we did not need encryption, a simple hash would do.
 
-If you have some work that is not yet publication-ready, but you want to claim you were first to do it, you can use this repository to register your claim.
-
-The recommended workflow is: zip your work, calculate its SHA-256 hash, and post the hash
+If you have some work that is not yet publication-ready, but you want to claim you were first to do it, you should:
+zip your work, calculate its SHA-256 hash, and post the hash
 on your favorite social media (anywhere that doesn't allow you to change the date of the post to the past). The date of the post is your claim date.
+
+We have detailed instructions below, and a workaround if you do not have social media.
 
 ## Detailed instructions
 
