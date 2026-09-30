@@ -1,0 +1,50 @@
+name: Submit claim
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: claim-intake
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    if: startsWith(github.event.issue.title, '[Claim]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const { configureBackoff } = require('./.github/scripts/claims.cjs');
+            configureBackoff(github);
+            try {
+              const submit = require('./.github/scripts/submit-claim.cjs');
+              const pr = await submit({ github, context });
+              await core.summary.addLink('Claim PR', pr.html_url).write();
+            } catch (error) {
+              const limited = error.name === 'ClaimLimitError';
+              if (limited) core.notice(error.message);
+              else core.setFailed(error.message);
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: context.issue.number,
+                body: [
+                  '🤖 AI text below 🤖',
+                  '',
+                  limited ? error.message : 'Could not register this claim. Submit exactly one SHA-256 hash (64 hexadecimal characters) in a new issue, or ask a maintainer to rerun the workflow if the hash is already correct.',
+                  '',
+                  `[Workflow details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                ].join('\n'),
+              });
+            }

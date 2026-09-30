@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: claim-tests
+        name: claim tests
+        entry: node --test
+        language: system
+        pass_filenames: false
+        always_run: true
